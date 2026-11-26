@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบติดตามความเชื่อมโยง PLO – รายวิชา – CLO | หลักสูตรสารสนเทศศาสตร์ (436)</title>
+
+  <!-- Google Fonts: Prompt (หัวข้อ) และ Sarabun (เนื้อหา) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#1B365D',
+            'navy-dark': '#132744',
+            slatebrand: '#2F5E8A',
+            'slatebrand-light': '#E8F0F8',
+            bgsoft: '#F4F7FA',
+          },
+          fontFamily: {
+            heading: ['Prompt', 'sans-serif'],
+            sans: ['Sarabun', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #F4F7FA;
+      color: #1E293B;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Prompt', sans-serif;
+    }
+
+    /* การปรับแต่งสำหรับการพิมพ์รายงาน (Print / Save as PDF) */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 14mm 12mm;
+      }
+      body {
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-break-inside-avoid {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .shadow-sm, .shadow, .shadow-md {
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- ================= ส่วนหัวเว็บไซต์ (Header) ================= -->
+  <header class="bg-navy text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-100 text-xs font-medium mb-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            หลักสูตรสารสนเทศศาสตร์ (รหัส 436)
+          </div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-heading font-semibold tracking-tight">
+            ระบบติดตามความเชื่อมโยง PLO – ชั้นปี – รายวิชา – CLO
+          </h1>
+          <p class="text-blue-100/90 text-sm sm:text-base mt-1">
+            แดชบอร์ดคัดกรองและวิเคราะห์ผลลัพธ์การเรียนรู้ เพื่อการติดตามและปรับปรุงการเรียนการสอน
+          </p>
+        </div>
+
+        <!-- ปุ่มพิมพ์รายงาน (ซ่อนตอนพิมพ์) -->
+        <div class="flex items-center gap-2.5 no-print shrink-0">
+          <button
+            id="btnResetTop"
+            type="button"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition cursor-pointer border border-white/15"
+            title="ล้างตัวกรองทั้งหมด"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>ล้างตัวกรอง</span>
+          </button>
+          <button
+            id="btnPrint"
+            type="button"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-navy hover:bg-blue-50 text-sm font-semibold shadow-sm transition cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>พิมพ์รายงาน / PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= ส่วนเนื้อหาหลัก (Main Container) ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- สรุปเงื่อนไขที่กำลังแสดง (แสดงเฉพาะตอนสั่งพิมพ์) -->
+    <div id="printFilterSummary" class="hidden print-only border border-slate-300 rounded-xl p-3 text-sm bg-slate-50">
+      <!-- เติมข้อความด้วย JS -->
+    </div>
+
+    <!-- ================= แผงควบคุมการคัดกรอง (Multi-Filter Panel) ================= -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6 space-y-5 no-print" aria-label="แผงควบคุมการคัดกรองข้อมูล">
+
+      <!-- แถวที่ 1: ประเภทวิชา + ชั้นปี -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- ประเภทวิชา -->
+        <div class="lg:col-span-6">
+          <label class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            ประเภทวิชา
+          </label>
+          <div class="inline-flex flex-wrap gap-2 w-full" id="courseTypeGroup" role="group" aria-label="เลือกประเภทวิชา">
+            <button type="button" data-type="all" class="type-btn flex-1 sm:flex-none px-4 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              ทั้งหมด (40)
+            </button>
+            <button type="button" data-type="mandatory" class="type-btn flex-1 sm:flex-none px-4 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              เฉพาะวิชาบังคับ (17)
+            </button>
+            <button type="button" data-type="elective" class="type-btn flex-1 sm:flex-none px-4 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              เฉพาะวิชาเลือก (23)
+            </button>
+          </div>
+        </div>
+
+        <!-- ชั้นปี (เลือกได้หลายชั้นปี) -->
+        <div class="lg:col-span-6">
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500">
+              ชั้นปี (เลือกได้มากกว่า 1 ชั้นปี)
+            </label>
+            <span class="text-xs text-slate-400">ดูจากเลขตัวแรกของรหัส 3 หลัก</span>
+          </div>
+          <div class="flex flex-wrap gap-2" id="yearFilterGroup" role="group" aria-label="เลือกชั้นปี">
+            <button type="button" data-year="all" class="year-btn px-3.5 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              ทุกชั้นปี
+            </button>
+            <button type="button" data-year="1" class="year-btn px-3.5 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              ปี 1
+            </button>
+            <button type="button" data-year="2" class="year-btn px-3.5 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              ปี 2
+            </button>
+            <button type="button" data-year="3" class="year-btn px-3.5 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              ปี 3
+            </button>
+            <button type="button" data-year="4" class="year-btn px-3.5 py-2 rounded-xl text-sm font-medium border transition cursor-pointer">
+              ปี 4
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- แถวที่ 2: คัดกรองตาม PLO (Chips) -->
+      <div class="pt-4 border-t border-slate-100">
+        <div class="flex items-center justify-between mb-2.5">
+          <label class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500">
+            คัดกรองตามผลลัพธ์การเรียนรู้ระดับหลักสูตร (PLO) — เลือกได้หลายรายการ
+          </label>
+          <span id="ploSelectedHint" class="text-xs text-slatebrand font-medium">แสดงทั้งหมด</span>
+        </div>
+        <div class="flex flex-wrap gap-2" id="ploChipGroup" role="group" aria-label="เลือก PLO">
+          <!-- สร้างปุ่มชิป PLO11-PLO19 ด้วย JS -->
+        </div>
+      </div>
+
+      <!-- แถวที่ 3: Dropdown เลือกรายวิชา + ช่องค้นหาคำสำคัญ -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pt-4 border-t border-slate-100">
+        <!-- Dropdown เลือกรายวิชาเฉพาะ -->
+        <div class="md:col-span-6">
+          <label for="courseSelect" class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            เลือกรายวิชาเฉพาะ
+          </label>
+          <div class="relative">
+            <select
+              id="courseSelect"
+              class="w-full appearance-none bg-slate-50 border border-slate-200 hover:border-slatebrand/60 focus:border-slatebrand focus:ring-2 focus:ring-slatebrand/20 rounded-xl px-4 py-2.5 pr-10 text-sm text-slate-800 outline-none transition cursor-pointer"
+            >
+              <option value="">-- แสดงทุกรายวิชาตามเงื่อนไข --</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ช่องค้นหาคำสำคัญ -->
+        <div class="md:col-span-6">
+          <label for="searchInput" class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            ค้นหาคำสำคัญ (รหัสวิชา, ชื่อวิชา, คำใน CLO)
+          </label>
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+              </svg>
+            </div>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="เช่น 436 306, จริยธรรม, เมทาดาทา, กราฟิก..."
+              class="w-full bg-slate-50 border border-slate-200 hover:border-slatebrand/60 focus:border-slatebrand focus:ring-2 focus:ring-slatebrand/20 rounded-xl pl-10 pr-9 py-2.5 text-sm text-slate-800 outline-none transition"
+            />
+            <button
+              id="btnClearSearch"
+              type="button"
+              class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+              aria-label="ล้างคำค้นหา"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= แถบสรุปสถิติแบบไดนามิก (KPI Summary Bar) ================= -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="สรุปสถิติตามตัวกรองปัจจุบัน">
+      <!-- KPI 1: รายวิชาที่พบ -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-navy/10 text-navy flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-heading font-medium text-slate-500">รายวิชาที่พบ</p>
+          <div class="flex items-baseline gap-2 mt-0.5">
+            <span id="kpiCourses" class="text-2xl font-heading font-bold text-navy">0</span>
+            <span class="text-sm text-slate-500">รายวิชา</span>
+          </div>
+          <p id="kpiCourseBreakdown" class="text-xs text-slate-500 mt-0.5 truncate">บังคับ 0 | เลือก 0</p>
+        </div>
+      </div>
+
+      <!-- KPI 2: CLO ที่พบ -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-slatebrand/10 text-slatebrand flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-heading font-medium text-slate-500">ผลลัพธ์การเรียนรู้รายวิชา (CLO)</p>
+          <div class="flex items-baseline gap-2 mt-0.5">
+            <span id="kpiCLOs" class="text-2xl font-heading font-bold text-slatebrand">0</span>
+            <span class="text-sm text-slate-500">CLOs</span>
+          </div>
+          <p id="kpiMappings" class="text-xs text-slate-500 mt-0.5 truncate">รวมความเชื่อมโยง 0 รายการ</p>
+        </div>
+      </div>
+
+      <!-- KPI 3: PLO ที่ครอบคลุม -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-heading font-medium text-slate-500">PLO ที่ครอบคลุม</p>
+          <div class="flex items-baseline gap-2 mt-0.5">
+            <span id="kpiPLOs" class="text-2xl font-heading font-bold text-emerald-700">0</span>
+            <span class="text-sm text-slate-500">/ 9 PLOs</span>
+          </div>
+          <p id="kpiPLONote" class="text-xs text-slate-500 mt-0.5 truncate">PLO11 – PLO19</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= แท็บสลับมุมมองการแสดงผล (View Tabs) ================= -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
+      <div class="inline-flex bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200/80 w-full sm:w-auto" role="tablist" aria-label="มุมมองการแสดงผล">
+        <button type="button" role="tab" data-tab="plo" class="tab-btn flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+          <span>มุมมองตาม PLO</span>
+        </button>
+        <button type="button" role="tab" data-tab="course" class="tab-btn flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span>มุมมองตามรายวิชา</span>
+        </button>
+        <button type="button" role="tab" data-tab="matrix" class="tab-btn flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <span>ตารางเมทริกซ์ (PLO × ชั้นปี)</span>
+        </button>
+      </div>
+
+      <div id="activeViewHint" class="text-xs sm:text-sm text-slate-500">
+        <!-- ข้อความแนะนำมุมมองปัจจุบัน -->
+      </div>
+    </div>
+
+    <!-- ================= พื้นที่แสดงผลลัพธ์หลัก ================= -->
+    <section id="contentArea" class="space-y-5" aria-live="polite">
+      <!-- เนื้อหาจะถูกสร้างและอัปเดตด้วย JavaScript -->
+    </section>
+
+  </main>
+
+  <!-- ================= ส่วนท้ายเว็บไซต์ (Footer) ================= -->
+  <footer class="mt-10 border-t border-slate-200 bg-white/80 py-5 text-center text-xs sm:text-sm text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      หลักสูตรสารสนเทศศาสตร์ (รหัส 436) • ระบบติดตามความเชื่อมโยง PLO – ชั้นปี – รายวิชา – CLO (ครบทั้ง 40 รายวิชา / 141 CLOs)
+    </div>
+  </footer>
+
+  <!-- ================= สคริปต์ข้อมูลและตรรกะทั้งหมด ================= -->
+  <script>
+    /**
+     * ============================================================================
+     * 1. ข้อมูลหลักสูตร (Master Data) — ครบทั้ง 9 PLOs และ 40 รายวิชา (141 CLOs)
+     * ============================================================================
+     */
+    const PLOS = [
+      { id: 'PLO11', short: 'การบริหารจัดการองค์กรและระบบสารสนเทศ', desc: 'เข้าใจการบริหารจัดการองค์กร และระบบสารสนเทศภายในองค์กร' },
+      { id: 'PLO12', short: 'การจัดหาและรวบรวมสารสนเทศ', desc: 'ดำเนินการจัดหาและรวบรวมสารสนเทศได้' },
+      { id: 'PLO13', short: 'การจัดโครงสร้าง การจัดเก็บและค้นคืน', desc: 'จัดโครงสร้างสารสนเทศและพัฒนาระบบสารสนเทศเพื่อการจัดเก็บและค้นคืนได้' },
+      { id: 'PLO14', short: 'ทักษะการนำเสนอข้อมูลรูปแบบต่างๆ', desc: 'มีทักษะในการนำเสนอข้อมูลรูปแบบต่างๆ' },
+      { id: 'PLO15', short: 'การจัดบริการสารสนเทศตรงความต้องการผู้ใช้', desc: 'ระบุการจัดบริการสารสนเทศที่สอดคล้องกับความต้องการของผู้ใช้' },
+      { id: 'PLO16', short: 'การเลือกใช้เทคโนโลยีสารสนเทศให้ตรงวัตถุประสงค์', desc: 'รู้จักและเลือกใช้เทคโนโลยีสารสนเทศให้สอดคล้องกับวัตถุประสงค์ของงานสารสนเทศ' },
+      { id: 'PLO17', short: 'การประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์', desc: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์ในงานสารสนเทศ' },
+      { id: 'PLO18', short: 'การจัดการสารสนเทศทางศิลปะและมรดกวัฒนธรรม', desc: 'อธิบายหลักการจัดการสารสนเทศทางศิลปะและมรดกทางวัฒนธรรม' },
+      { id: 'PLO19', short: 'จริยธรรม กฎหมาย และการทำงานร่วมกับผู้อื่น', desc: 'แสดงออกซึ่งทักษะความสัมพันธ์ระหว่างบุคคล สามารถทำงานร่วมกับผู้อื่นได้ มีระเบียบวินัย ซื่อสัตย์สุจริต มีความรับผิดชอบต่อตนเองและสังคม' }
+    ];
+
+    const COURSES = [
+      {
+        code: '436 101', name: 'เทคโนโลยีสารสนเทศและการสื่อสาร', year: 1, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความหมาย ความสำคัญและองค์ประกอบของเทคโนโลยีสารสนเทศและการสื่อสารในระดับที่แตกต่างกันในองค์กรและสังคม', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'ยกตัวอย่างการประยุกต์ใช้เทคโนโลยีสารสนเทศและการสื่อสารในงานด้านต่าง ๆ ได้', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'อธิบายแนวโน้มการใช้เทคโนโลยีสารสนเทศและการสื่อสารรวมถึงผลกระทบได้', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'ระบุการใช้เทคโนโลยีสารสนเทศและการสื่อสารอย่างมีจริยธรรมและถูกกฎหมาย เช่น พรบ.คอมพิวเตอร์ ได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 102', name: 'สารสนเทศศาสตร์และบรรณารักษศาสตร์เบื้องต้น', year: 1, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความหมาย ความสำคัญ พัฒนาการของสารสนเทศ และความสัมพันธ์ของสารสนเทศกับวิชาอื่น ๆ', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'รู้จักประเภท และแหล่งสารสนเทศ', plos: ['PLO11'] },
+          { id: 'CLO3', text: 'รู้และเข้าใจการใช้เทคโนโลยีกับงานสารสนเทศ ตลอดจนปัญหาและแนวโน้มที่เกี่ยวข้องกับสารสนเทศ', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'รู้จักองค์กรวิชาชีพทางสารสนเทศ จริยธรรม และกฎหมายสำคัญในงานสารสนเทศ เช่น พรบ.ลิขสิทธิ์', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 201', name: 'แหล่งสารสนเทศ', year: 2, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักหลักการเลือกแหล่งสารสนเทศประเภทต่างๆ', plos: ['PLO12'] },
+          { id: 'CLO2', text: 'อธิบายขั้นตอนการใช้งานแหล่งสารสนเทศประเภทต่างๆ', plos: ['PLO12'] },
+          { id: 'CLO3', text: 'เลือกใช้เทคนิคการสืบค้นที่เหมาะสมกับความต้องการสารสนเทศได้', plos: ['PLO13'] }
+        ]
+      },
+      {
+        code: '436 202', name: 'การพัฒนาทรัพยากรสารสนเทศ', year: 2, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎีการพัฒนาทรัพยากรสารสนเทศได้', plos: ['PLO12'] },
+          { id: 'CLO2', text: 'ระบุวิธีกระบวนการในพัฒนาทรัพยากรสารสนเทศที่เหมาะสมได้', plos: ['PLO12'] },
+          { id: 'CLO3', text: 'ยกตัวอย่างการจัดหาสารสนเทศอย่างมีจริยธรรม และถูกกฎหมายได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 203', name: 'การออกแบบกราฟิกในงานสารสนเทศ', year: 2, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดการออกแบบกราฟิกได้', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'ออกแบบชิ้นงานกราฟิกเพื่อนำเสนอสารสนเทศได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'ใช้เครื่องมือในการออกแบบกราฟิกและสร้างชิ้นงานได้', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์ในการสร้างชิ้นงานกราฟิกได้', plos: ['PLO17'] }
+        ]
+      },
+      {
+        code: '436 211', name: 'อินเทอร์เน็ตและการสืบค้น', year: 2, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักและเลือกใช้เครื่องมือการสืบค้น', plos: ['PLO13'] },
+          { id: 'CLO2', text: 'ใช้กลยุทธ์ในการสืบค้นสารสนเทศได้', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'ประเมินค่าสารสนเทศที่ค้นได้', plos: ['PLO13'] },
+          { id: 'CLO4', text: 'อธิบายกฎหมายและจริยธรรมการใช้สารสนเทศบนอินเทอร์เน็ตได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 231', name: 'การส่งเสริมการอ่านในศตวรรษที่ 21', year: 2, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'เข้าใจจิตวิทยาทางการอ่านและทักษะการอ่าน', plos: ['PLO15'] },
+          { id: 'CLO2', text: 'เลือกทรัพยากรการอ่านที่เหมาะสมกับผู้อ่านได้', plos: ['PLO15'] },
+          { id: 'CLO3', text: 'มีทักษะในการทำงานร่วมกับผู้อื่นเพื่อจัดกิจกรรมส่งเสริมการอ่านได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 232', name: 'โปรแกรมประยุกต์เพื่องานวิชาการ', year: 2, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'ประยุกต์ใช้โปรแกรมประมวลผลคำเพื่อการจัดทำรายงานทางวิชาการได้', plos: ['PLO16'] },
+          { id: 'CLO2', text: 'ประยุกต์ใช้โปรแกรมเพื่อการนำเสนองานเพื่อนำเสนองานทางวิชาการได้', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'ประยุกต์ใช้โปรแกรมตารางคำนวณเพื่องานทางวิชาการได้', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 233', name: 'โปรแกรมประยุกต์โอเพนซอร์สเพื่องานสารสนเทศ', year: 2, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักโปรแกรมประยุกต์โอเพนซอร์สและมาตรฐานที่เกี่ยวข้อง', plos: ['PLO16'] },
+          { id: 'CLO2', text: 'เลือกใช้โปรแกรมประยุกต์โอเพนซอร์สได้อย่างเหมาะกับงานสารสนเทศประเภทต่าง ๆ ได้', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 301', name: 'เทคโนโลยีเว็บเพื่อการนำเสนอสารสนเทศ', year: 3, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักแนวคิด ทฤษฎีของเทคโนโลยีเว็บ', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'ออกแบบและพัฒนาเว็บไซต์เพื่อการนำเสนอสารสนเทศได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'เลือกใช้เทคโนโลยีที่เหมาะสมกับการพัฒนาเว็บไซต์ได้', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 302', name: 'การทำรายการสารสนเทศ', year: 3, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักการทำรายการภายใต้มาตรฐานที่เกี่ยวข้อง เช่น AACR II ; MARC 21; RDA เป็นต้น', plos: ['PLO13'] },
+          { id: 'CLO2', text: 'สามารถลงรายการได้ถูกต้องตามมาตรฐานและเหมาะสมกับวัสดุสารสนเทศ', plos: ['PLO13'] }
+        ]
+      },
+      {
+        code: '436 303', name: 'การวิเคราะห์และออกแบบระบบ', year: 3, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดและเครื่องมือของการวิเคราะห์และออกแบบระบบสารสนเทศ', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'รู้จักและใช้เครื่องมือเพื่อวิเคราะห์และออกแบบระบบขนาดเล็กได้', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'สร้างและตีความเอกสารที่เกี่ยวข้องกับการวิเคราะห์และออกแบบระบบ', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'ใช้เครื่องมือเพื่อวิเคราะห์และออกแบบระบบที่มีขนาดเล็ก', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 304', name: 'บริการสารสนเทศและการตลาด', year: 3, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎี กระบวนการในการจัดบริการสารสนเทศได้', plos: ['PLO15'] },
+          { id: 'CLO2', text: 'ยกตัวอย่างวิธีการศึกษาผู้ใช้ได้', plos: ['PLO15'] },
+          { id: 'CLO3', text: 'อธิบายแนวคิดด้านกลยุทธ์การตลาดเพื่อส่งเสริมการจัดบริการสารสนเทศได้', plos: ['PLO15'] },
+          { id: 'CLO4', text: 'ใช้เทคโนโลยีสารสนเทศและการสื่อสารเพื่อให้บริการสารสนเทศได้', plos: ['PLO16'] },
+          { id: 'CLO5', text: 'อธิบายกรณีการจัดการจัดบริการสารสนเทศที่มีจริยธรรมและถูกกฎหมายได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 305', name: 'การวิเคราะห์ทรัพยากรสารสนเทศ', year: 3, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดการวิเคราะห์ทรัพยากรสารสนเทศได้', plos: ['PLO13'] },
+          { id: 'CLO2', text: 'จัดหมวดหมู่หนังสือด้วยระบบทศนิยมของดิวอีได้', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'จัดหมวดหมู่หนังสือด้วยระบบหอสมุดรัฐสภาอเมริกันได้', plos: ['PLO13'] },
+          { id: 'CLO4', text: 'กำหนดเลขเรียกหนังสือให้กับทรัพยากรสารสนเทศได้', plos: ['PLO13'] },
+          { id: 'CLO5', text: 'กำหนดหัวเรื่องให้กับทรัพยากรสารสนเทศได้', plos: ['PLO13'] }
+        ]
+      },
+      {
+        code: '436 306', name: 'การจัดการเอกสารดิจิทัล', year: 3, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักคุณลักษณะของเอกสารหลากหลายประเภท', plos: ['PLO12', 'PLO18'] },
+          { id: 'CLO2', text: 'รู้หลักการสร้างและจัดเก็บเอกสารเพื่อคงความน่าเชื่อถือของเอกสารได้', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'รู้จักเทคโนโลยีที่เกี่ยวข้อง เช่น ระบบจัดการเอกสาร ระบบเครือข่าย', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'รู้กฎหมายเกี่ยวกับการจัดการเอกสารดิจิทัล', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 311', name: 'การจัดโครงสร้างสารสนเทศ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อภิปรายแนวคิด ทฤษฎี ที่เกี่ยวข้องกับการจัดโครงสร้างสารสนเทศได้', plos: ['PLO13'] },
+          { id: 'CLO2', text: 'เลือกใช้มาตรฐานการจัดหมวดหมู่ได้เหมาะสมกับการจัดการโครงสร้างสารสนเทศ', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'เลือกใช้เมทาดาทาได้เหมาะสมกับการจัดการโครงสร้างสารสนเทศ', plos: ['PLO13'] },
+          { id: 'CLO4', text: 'เลือกใช้วิธีจัดโครงสร้างสารสนเทศที่เหมาะสมกับทรัพยากรสารสนเทศได้', plos: ['PLO13'] }
+        ]
+      },
+      {
+        code: '436 312', name: 'การปรับแต่งสารสนเทศ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด หลักปฏิบัติ เกี่ยวกับการปรับแต่งสารสนเทศ', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'อธิบายกระบวนการปรับแต่งสารสนเทศได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'ปรับแต่งสารสนเทศให้อยู่ในรูปแบบพร้อมใช้ที่ตรงตามความต้องการของผู้ใช้', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'ประยุกต์ใช้เทคโนโลยีสารสนเทศในการปรับแต่งสารสนเทศได้', plos: ['PLO16'] },
+          { id: 'CLO5', text: 'ใช้ความคิดสร้างสรรค์ในการนำเสนอผลงานหรือโครงการและเผยแพร่ผลงานได้', plos: ['PLO17'] }
+        ]
+      },
+      {
+        code: '436 331', name: 'การเล่าเรื่องเชิงสร้างสรรค์', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดและเทคนิคของการเล่าเรื่องได้', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'ยกตัวอย่างการวิเคราะห์กลุ่มเป้าหมายของการเล่าเรื่องได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'สาธิตการเล่าเรื่องเพื่อการนำเสนอได้', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'ประยุกต์ใช้เทคโนโลยีสารสนเทศเพื่อสื่อสารเรื่องราวได้อย่างเหมาะสม', plos: ['PLO16'] },
+          { id: 'CLO5', text: 'ระบุกรณีการเล่าเรื่องที่อยู่บนพื้นฐานของกฎหมายและจริยธรรมได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 332', name: 'เครือข่ายทางสังคมและการสื่อสารทางวิชาชีพ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'เข้าใจแนวคิดเครือข่ายทางสังคมและการสื่อสารทางวิชาชีพสารสนเทศ', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'เข้าใจวิธีการประเมินเครือข่ายทางสังคมและการสื่อสารทางวิชาชีพสารสนเทศ', plos: ['PLO11'] },
+          { id: 'CLO3', text: 'ประยุกต์เครือข่ายทางสังคมและการสื่อสารทางวิชาชีพในงานสารสนเทศ', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'รู้จักเทคโนโลยีของเครือข่ายทางสังคมและการสื่อสารทางวิชาชีพ', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 333', name: 'การจัดการจดหมายเหตุ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายกระบวนการจัดหาและรวบรวมเอกสารจดหมายเหตุในองค์กรได้', plos: ['PLO12'] },
+          { id: 'CLO2', text: 'รู้การจัดบริการจดหมายเหตุ รวมถึงการจัดนิทรรศการ การประชาสัมพันธ์และการอนุรักษ์สงวนรักษาเอกสารจดหมายเหตุ', plos: ['PLO15'] },
+          { id: 'CLO3', text: 'รู้จักและเข้าใจเทคโนโลยีที่เกี่ยวข้องกับงานจดหมายเหตุ', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'รู้จักกฎหมายและระเบียบที่เกี่ยวเนื่องกับงานจดหมายเหตุ', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 334', name: 'การออกแบบสื่อดิจิทัลและสิ่งพิมพ์', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายกระบวนการผลิตสื่อดิจิทัลและสิ่งพิมพ์ได้', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'เลือกใช้ระบบการผลิต เทคนิคและเทคโนโลยีการผลิตสื่อดิจิทัลและสิ่งพิมพ์ได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'รู้จักธุรกิจการพิมพ์และการเผยแพร่สื่อดิจิทัลและสิ่งพิมพ์', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'ประยุกต์ใช้โปรแกรมคอมพิวเตอร์ในการผลิตสิ่งพิมพ์ได้', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 335', name: 'โปรแกรมประยุกต์เพื่องานธุรกิจ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายกระบวนการทางธุรกิจได้', plos: ['PLO16'] },
+          { id: 'CLO2', text: 'อธิบายแนวทางการจัดการสารสนเทศเพื่องานธุรกิจได้', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'ใช้โปรแกรมประยุกต์เพื่อการจัดการสารสนเทศในงานธุรกิจได้', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'ใช้เทคโนโลยีเพื่อการทำงานร่วมกันได้', plos: ['PLO16'] },
+          { id: 'CLO5', text: 'อธิบายกรณีการใช้เทคโนโลยีที่มีจริยธรรม และถูกกฎหมายได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 336', name: 'การถ่ายภาพดิจิทัลและการผลิตวีดิทัศน์', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'ถ่ายภาพนิ่งและภาพเคลื่อนไหวด้วยกล้องดิจิทัลได้', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'ประยุกต์ใช้โปรแกรมคอมพิวเตอร์ในการปรับแต่งภาพและตัดต่อภาพและเสียงได้', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'ใช้ความคิดสร้างสรรค์ในการนำเสนอผลงานหรือโครงการและเผยแพร่ผลงานได้', plos: ['PLO17'] }
+        ]
+      },
+      {
+        code: '436 337', name: 'ภาษาอังกฤษเพื่อนักสารสนเทศ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักคำศัพท์และประโยคที่เหมาะสมกับสถานการณ์และงานบริการ', plos: ['PLO19'] },
+          { id: 'CLO2', text: 'พูดและเขียนได้ตามวัตถุประสงค์', plos: ['PLO19'] },
+          { id: 'CLO3', text: 'อ่านจับใจความสำคัญได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 338', name: 'การนำเสนอด้วยภาพ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้หลักการแนวคิด ทฤษฎี การนำเสนอด้วยภาพ', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'รู้วิธีการจัดเตรียมข้อมูล ปรับแต่งข้อมูล และเชื่อมโยงข้อมูลเพื่อนำเสนอ', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'เข้าใจเทคนิคทางสถิติ', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'ออกแบบและนำเสนอข้อมูลด้วยภาพได้', plos: ['PLO14'] }
+        ]
+      },
+      {
+        code: '436 339', name: 'ระบบห้องสมุดอัตโนมัติ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายระบบงานห้องสมุดได้', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'รู้จักและอธิบายการทำงานของระบบห้องสมุดอัตโนมัติ', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'เลือกใช้โปรแกรมระบบห้องสมุดอัตโนมัติที่เหมาะสมกับระดับห้องสมุด', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 340', name: 'การสื่อสารในงานสารสนเทศ', year: 3, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักรูปแบบการเขียนเอกสารในงานสารสนเทศ', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'รู้จักรูปแบบการพูดเพื่อการสื่อสารในงานสารสนเทศ', plos: ['PLO14'] }
+        ]
+      },
+      {
+        code: '436 401', name: 'การจัดการฐานข้อมูล', year: 4, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักแนวคิดการจัดการข้อมูลด้วยฐานข้อมูล', plos: ['PLO16'] },
+          { id: 'CLO2', text: 'รู้จักภาษา SQL โดยเน้นภาษาการจัดการข้อมูล', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'สร้างฐานข้อมูลเพื่อจัดการสารสนเทศตามวัตถุประสงค์ได้', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 402', name: 'สัมมนาการฝึกปฏิบัติงาน', year: 4, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'เข้าใจลักษณะงานขององค์กร/หน่วยงานที่ฝึกปฏิบัติงาน', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'วิเคราะห์กระบวนการปฏิบัติงานในสถาบันบริการสารสนเทศได้', plos: ['PLO12', 'PLO13', 'PLO15'] },
+          { id: 'CLO3', text: 'ประยุกต์ใช้เทคโนโลยีสารสนเทศในการนำเสนองานได้', plos: ['PLO14', 'PLO16'] },
+          { id: 'CLO4', text: 'อภิปรายประเด็นการฝึกปฏิบัติงาน', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 403', name: 'การค้นคืนสารสนเทศดิจิทัล', year: 4, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'รู้หลักการเมทาดาทาเพื่อการจัดเก็บและค้นคืนสารสนเทศดิจิทัล', plos: ['PLO13'] },
+          { id: 'CLO2', text: 'รู้จักโปรโตคอลที่ใช้ในการค้นคืนสารสนเทศ', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'รู้จักการประเมินผลการค้นคืนสารสนเทศ', plos: ['PLO13'] },
+          { id: 'CLO4', text: 'ใช้เทคโนโลยีในการจัดเก็บและค้นคืนได้', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 404', name: 'การจัดการความรู้', year: 4, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎี กระบวนการจัดการความรู้สำหรับองค์กรได้', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'อธิบายการใช้เทคโนโลยีสารสนเทศและการสื่อสารเพื่อการจัดการความรู้ได้', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'ระบุกรณีการจัดการความรู้อย่างมีจริยธรรม และถูกกฎหมายได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 405', name: 'ห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน', year: 4, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดของห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'อธิบายการจัดระบบ การจัดการและการประเมินผล ตลอดจนเครื่องมือที่เกี่ยวข้องกับการออกแบบห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน', plos: ['PLO13'] },
+          { id: 'CLO3', text: 'ออกแบบเพื่อพัฒนาห้องสมุดดิจิทัลและคลังสารสนเทศสถาบันขนาดเล็ก', plos: ['PLO14'] },
+          { id: 'CLO4', text: 'รู้จักและเลือกใช้โปรแกรมจัดการระบบห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน เช่น Omeka, Greenstone, Dspace เป็นต้น', plos: ['PLO16'] }
+        ]
+      },
+      {
+        code: '436 406', name: 'การวิจัยพื้นฐานทางสารสนเทศศาสตร์', year: 4, type: 'mandatory',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความหมาย ความสำคัญ ประเภทงานวิจัย และรวบรวมสารสนเทศเพื่อการวิจัยทางสารสนเทศศาสตร์ได้', plos: ['PLO12'] },
+          { id: 'CLO2', text: 'เขียนโครงร่างการวิจัยได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'อธิบายจริยธรรมการวิจัยได้', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 411', name: 'การจัดการสารสนเทศธุรกิจ', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎีที่เกี่ยวข้องกับการจัดการสารสนเทศทางธุรกิจได้', plos: ['PLO11'] },
+          { id: 'CLO2', text: 'เลือกใช้เทคโนโลยีสารสนเทศและการสื่อสารเพื่อการจัดการได้', plos: ['PLO16'] },
+          { id: 'CLO4', text: 'ระบุการใช้สารสนเทศทางธุรกิจอย่างมีจริยธรรมและถูกกฎหมายได้ (หมายเหตุ: ในเอกสารต้นฉบับไม่ปรากฏ CLO3)', plos: ['PLO19'] }
+        ]
+      },
+      {
+        code: '436 431', name: 'สารสนเทศทางวัฒนธรรม', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความต้องการของผู้ใช้สารสนเทศทางวัฒนธรรมได้', plos: ['PLO15'] },
+          { id: 'CLO2', text: 'รู้จักและเข้าใจแนวคิด ลักษณะ และประเภทของสารสนเทศทางวัฒนธรรม', plos: ['PLO18'] },
+          { id: 'CLO3', text: 'รู้จักและอธิบายการดำเนินงานแหล่งสารสนเทศทางวัฒนธรรม', plos: ['PLO18'] },
+          { id: 'CLO4', text: 'รู้วิธีการอนุรักษ์และบำรุงรักษาสารสนเทศทางวัฒนธรรม', plos: ['PLO18'] }
+        ]
+      },
+      {
+        code: '436 433', name: 'การบริหารโครงการ', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎี วงจรชีวิตของโครงการประเภทต่างๆ ได้', plos: ['PLO11'] }
+        ]
+      },
+      {
+        code: '436 434', name: 'ศิลปะในสถาบันบริการสารสนเทศ', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักหลักการ แนวคิดเบื้องต้นทางศิลปะ', plos: ['PLO17'] },
+          { id: 'CLO2', text: 'รู้กระบวนการสร้างสรรค์งานศิลปะ และวิธีการจัดเก็บและบันทึกเรื่องราวระหว่างการสร้างสรรค์งาน', plos: ['PLO17'] },
+          { id: 'CLO3', text: 'อธิบายความสำคัญของศิลปะที่มีต่อสถาบันบริการสารสนเทศ', plos: ['PLO17'] },
+          { id: 'CLO4', text: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์ในการจัดและตกแต่งสถาบันบริการสารสนเทศได้', plos: ['PLO17'] }
+        ]
+      },
+      {
+        code: '436 435', name: 'การศึกษาเอกเทศ', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักการทบทวนวรรณกรรม', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'เลือกรูปแบบการนำเสนองานที่เหมาะสมกับประเด็นที่ศึกษาได้', plos: ['PLO14'] }
+        ]
+      },
+      {
+        code: '436 436', name: 'การออกแบบและผลิตสื่อมัลติมีเดีย', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'ระบุความต้องการสารสนเทศของผู้ใช้ / กลุ่มเป้าหมายได้', plos: ['PLO14'] },
+          { id: 'CLO2', text: 'ออกแบบสารสนเทศที่สอดคล้องกับความต้องการของผู้ใช้ได้', plos: ['PLO14'] },
+          { id: 'CLO3', text: 'ออกแบบและผลิตสื่อ โดยใช้เทคโนโลยีในการผลิตสื่อได้', plos: ['PLO17'] },
+          { id: 'CLO4', text: 'รู้วิธีการประเมินสื่อในด้านเนื้อหาและความสวยงาม', plos: ['PLO17'] }
+        ]
+      },
+      {
+        code: '436 437', name: 'การเขียนโปรแกรมเว็บ', year: 4, type: 'elective',
+        clos: [
+          { id: 'CLO1', text: 'รู้จักโครงสร้างภาษาเขียนโปรแกรม', plos: ['PLO16'] },
+          { id: 'CLO2', text: 'รู้จักวิธีการเชื่อมต่อฐานข้อมูลเพื่อนำข้อมูลมาใช้ในเว็บ', plos: ['PLO16'] },
+          { id: 'CLO3', text: 'สร้างโปรแกรมประยุกต์เว็บเพื่อจัดการข้อมูลได้', plos: ['PLO16'] }
+        ]
+      }
+    ];
+
+    /**
+     * ============================================================================
+     * 2. สถานะของแอปพลิเคชัน (Application State)
+     * ============================================================================
+     */
+    const state = {
+      courseType: 'mandatory', // ค่าเริ่มต้น: เฉพาะวิชาบังคับ (17)
+      selectedYears: [],       // [] = ทุกชั้นปี
+      selectedPLOs: [],        // [] = ทุก PLO
+      selectedCourse: '',      // '' = ทุกรายวิชา
+      searchQuery: '',
+      activeTab: 'plo'         // 'plo' | 'course' | 'matrix'
+    };
+
+    // คำนวณจำนวนวิชาบังคับต่อ PLO ทั้งหมดในหลักสูตร (สำหรับแจ้งจุดเฝ้าระวัง)
+    const mandatoryCourseCountByPLO = {};
+    PLOS.forEach(p => {
+      mandatoryCourseCountByPLO[p.id] = COURSES.filter(
+        c => c.type === 'mandatory' && c.clos.some(clo => clo.plos.includes(p.id))
+      ).length;
+    });
+
+    /**
+     * ============================================================================
+     * 3. ฟังก์ชันช่วยจัดการข้อความและคัดกรองข้อมูล (Helper & Filter Logic)
+     * ============================================================================
+     */
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function highlightText(text, query) {
+      const safe = escapeHtml(text);
+      if (!query) return safe;
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      return safe.replace(regex, '<mark class="bg-amber-200/80 text-slate-900 rounded px-0.5">$1</mark>');
+    }
+
+    function getCourseTypeBadge(type) {
+      if (type === 'mandatory') {
+        return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-navy/10 text-navy border border-navy/15">วิชาบังคับ</span>';
+      }
+      return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">วิชาเลือก</span>';
+    }
+
+    /**
+     * คืนค่ารายวิชาและ CLOs ที่ผ่านเงื่อนไขการกรองทั้งหมด
+     */
+    function getFilteredCourses() {
+      const q = state.searchQuery.trim().toLowerCase();
+
+      return COURSES.reduce((acc, course) => {
+        // กรองประเภทวิชา
+        if (state.courseType !== 'all' && course.type !== state.courseType) return acc;
+
+        // กรองชั้นปี
+        if (state.selectedYears.length > 0 && !state.selectedYears.includes(course.year)) return acc;
+
+        // กรองรายวิชาเฉพาะ
+        if (state.selectedCourse && course.code !== state.selectedCourse) return acc;
+
+        // ตรวจสอบว่าคำค้นหาตรงกับรหัสวิชาหรือชื่อวิชาหรือไม่
+        const courseMatchesSearch = !q ||
+          course.code.toLowerCase().includes(q) ||
+          course.name.toLowerCase().includes(q);
+
+        // กรอง CLOs ภายในรายวิชา
+        const matchedCLOs = course.clos.filter(clo => {
+          const matchesPLO = state.selectedPLOs.length === 0 ||
+            clo.plos.some(p => state.selectedPLOs.includes(p));
+          if (!matchesPLO) return false;
+
+          if (!q) return true;
+          return courseMatchesSearch ||
+            clo.id.toLowerCase().includes(q) ||
+            clo.text.toLowerCase().includes(q);
+        });
+
+        if (matchedCLOs.length > 0) {
+          acc.push({ ...course, matchedCLOs });
+        }
+        return acc;
+      }, []);
+    }
+
+    /**
+     * ============================================================================
+     * 4. การอัปเดต UI ของตัวกรอง (Filter Controls Rendering)
+     * ============================================================================
+     */
+    function initPLOChips() {
+      const container = document.getElementById('ploChipGroup');
+      let html = `
+        <button type="button" data-plo="all" class="plo-chip px-3.5 py-1.5 rounded-xl text-sm font-medium border transition cursor-pointer">
+          ทั้งหมด
+        </button>
+      `;
+      PLOS.forEach(p => {
+        html += `
+          <button
+            type="button"
+            data-plo="${p.id}"
+            title="${escapeHtml(p.desc)}"
+            class="plo-chip px-3.5 py-1.5 rounded-xl text-sm font-medium border transition cursor-pointer"
+          >
+            ${p.id}
+          </button>
+        `;
+      });
+      container.innerHTML = html;
+
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.plo-chip');
+        if (!btn) return;
+        const val = btn.dataset.plo;
+
+        if (val === 'all') {
+          state.selectedPLOs = [];
+        } else {
+          const idx = state.selectedPLOs.indexOf(val);
+          if (idx > -1) {
+            state.selectedPLOs.splice(idx, 1);
+          } else {
+            state.selectedPLOs.push(val);
+          }
+          // หากเลือกครบทั้ง 9 รายการ ให้ถือว่าแสดงทั้งหมด
+          if (state.selectedPLOs.length === PLOS.length) {
+            state.selectedPLOs = [];
+          }
+        }
+        renderAll();
+      });
+    }
+
+    function updateCourseDropdown() {
+      const select = document.getElementById('courseSelect');
+      // แสดงรายวิชาใน Dropdown ตามประเภทวิชาและชั้นปีที่เลือก
+      const available = COURSES.filter(c => {
+        const matchType = state.courseType === 'all' || c.type === state.courseType;
+        const matchYear = state.selectedYears.length === 0 || state.selectedYears.includes(c.year);
+        return matchType && matchYear;
+      });
+
+      // หากรายวิชาที่เคยเลือกไม่อยู่ในขอบเขตใหม่ ให้รีเซ็ตเป็นทั้งหมด
+      if (state.selectedCourse && !available.some(c => c.code === state.selectedCourse)) {
+        state.selectedCourse = '';
+      }
+
+      let optionsHtml = `<option value="">-- แสดงทุกรายวิชาตามเงื่อนไข (${available.length} วิชา) --</option>`;
+      [1, 2, 3, 4].forEach(yr => {
+        const yrCourses = available.filter(c => c.year === yr);
+        if (yrCourses.length === 0) return;
+        optionsHtml += `<optgroup label="ชั้นปีที่ ${yr}">`;
+        yrCourses.forEach(c => {
+          const tag = c.type === 'mandatory' ? '[บังคับ]' : '[เลือก]';
+          const selectedAttr = state.selectedCourse === c.code ? 'selected' : '';
+          optionsHtml += `<option value="${c.code}" ${selectedAttr}>${c.code} ${escapeHtml(c.name)} ${tag}</option>`;
+        });
+        optionsHtml += '</optgroup>';
+      });
+
+      select.innerHTML = optionsHtml;
+    }
+
+    function updateFilterUI() {
+      // 1. ปุ่มประเภทวิชา
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        const active = btn.dataset.type === state.courseType;
+        btn.className = `type-btn flex-1 sm:flex-none px-4 py-2 rounded-xl text-sm font-medium border transition cursor-pointer ${
+          active
+            ? 'bg-navy text-white border-navy shadow-sm'
+            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+        }`;
+      });
+
+      // 2. ปุ่มชั้นปี
+      document.querySelectorAll('.year-btn').forEach(btn => {
+        const val = btn.dataset.year;
+        const active = val === 'all'
+          ? state.selectedYears.length === 0
+          : state.selectedYears.includes(Number(val));
+        btn.className = `year-btn px-3.5 py-2 rounded-xl text-sm font-medium border transition cursor-pointer ${
+          active
+            ? 'bg-slatebrand text-white border-slatebrand shadow-sm'
+            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+        }`;
+      });
+
+      // 3. ปุ่มชิป PLO
+      document.querySelectorAll('.plo-chip').forEach(btn => {
+        const val = btn.dataset.plo;
+        const active = val === 'all'
+          ? state.selectedPLOs.length === 0
+          : state.selectedPLOs.includes(val);
+        btn.className = `plo-chip px-3.5 py-1.5 rounded-xl text-sm font-medium border transition cursor-pointer ${
+          active
+            ? 'bg-navy text-white border-navy shadow-sm'
+            : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slatebrand/50 hover:bg-slatebrand-light/40'
+        }`;
+      });
+
+      const ploHint = document.getElementById('ploSelectedHint');
+      ploHint.textContent = state.selectedPLOs.length === 0
+        ? 'แสดงทั้งหมด (PLO11 – PLO19)'
+        : `เลือกแล้ว ${state.selectedPLOs.length} รายการ: ${state.selectedPLOs.join(', ')}`;
+
+      // 4. Dropdown รายวิชา
+      updateCourseDropdown();
+
+      // 5. ปุ่มล้างคำค้นหา
+      document.getElementById('btnClearSearch').classList.toggle('hidden', !state.searchQuery);
+
+      // 6. แท็บมุมมอง
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const active = btn.dataset.tab === state.activeTab;
+        btn.className = `tab-btn flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-heading font-medium transition cursor-pointer ${
+          active
+            ? 'bg-navy text-white shadow-sm'
+            : 'text-slate-600 hover:text-navy hover:bg-slate-100'
+        }`;
+      });
+
+      // ข้อความแนะนำมุมมอง
+      const hintEl = document.getElementById('activeViewHint');
+      if (state.activeTab === 'plo') {
+        hintEl.textContent = 'จัดกลุ่มตาม PLO → ชั้นปี → รายวิชา → CLO';
+      } else if (state.activeTab === 'course') {
+        hintEl.textContent = 'จัดกลุ่มตามชั้นปี → การ์ดรายวิชาพร้อมแท็ก PLO ท้ายแต่ละ CLO';
+      } else {
+        hintEl.textContent = 'คลิกที่ช่องตัวเลขในตารางเพื่อเจาะลึกดูรายวิชาและ CLO ของ PLO และชั้นปีนั้นทันที';
+      }
+
+      // 7. อัปเดตข้อความสรุปเงื่อนไขสำหรับหน้าพิมพ์
+      const typeLabel = state.courseType === 'all'
+        ? 'ทั้งหมด (วิชาบังคับและวิชาเลือก)'
+        : state.courseType === 'mandatory' ? 'เฉพาะวิชาบังคับ' : 'เฉพาะวิชาเลือก';
+      const yearLabel = state.selectedYears.length === 0
+        ? 'ทุกชั้นปี (ปี 1–4)'
+        : state.selectedYears.slice().sort().map(y => `ปี ${y}`).join(', ');
+      const ploLabel = state.selectedPLOs.length === 0
+        ? 'ทั้งหมด (PLO11–PLO19)'
+        : state.selectedPLOs.join(', ');
+      const courseLabel = state.selectedCourse || 'ทุกรายวิชาตามเงื่อนไข';
+      const searchLabel = state.searchQuery ? ` | คำค้นหา: "${escapeHtml(state.searchQuery)}"` : '';
+
+      document.getElementById('printFilterSummary').innerHTML = `
+        <strong>เงื่อนไขรายงาน:</strong> ประเภทวิชา: ${typeLabel} | ชั้นปี: ${yearLabel} | PLO: ${ploLabel} | รายวิชา: ${escapeHtml(courseLabel)}${searchLabel}
+      `;
+    }
+
+    /**
+     * ============================================================================
+     * 5. การคำนวณและแสดงผล KPI Summary Bar
+     * ============================================================================
+     */
+    function renderKPIs(filteredCourses) {
+      const totalCourses = filteredCourses.length;
+      const mandatoryCount = filteredCourses.filter(c => c.type === 'mandatory').length;
+      const electiveCount = filteredCourses.filter(c => c.type === 'elective').length;
+
+      let totalUniqueCLOs = 0;
+      let totalMappings = 0;
+      const coveredPLOs = new Set();
+
+      filteredCourses.forEach(c => {
+        totalUniqueCLOs += c.matchedCLOs.length;
+        c.matchedCLOs.forEach(clo => {
+          clo.plos.forEach(p => {
+            if (state.selectedPLOs.length === 0 || state.selectedPLOs.includes(p)) {
+              coveredPLOs.add(p);
+              totalMappings += 1;
+            }
+          });
+        });
+      });
+
+      document.getElementById('kpiCourses').textContent = totalCourses;
+      document.getElementById('kpiCourseBreakdown').textContent = `วิชาบังคับ ${mandatoryCount} | วิชาเลือก ${electiveCount}`;
+      document.getElementById('kpiCLOs').textContent = totalUniqueCLOs;
+      document.getElementById('kpiMappings').textContent = `ความเชื่อมโยง CLO–PLO ${totalMappings} รายการ`;
+      document.getElementById('kpiPLOs').textContent = coveredPLOs.size;
+      document.getElementById('kpiPLONote').textContent = coveredPLOs.size > 0
+        ? Array.from(coveredPLOs).sort().join(', ')
+        : 'ไม่พบ PLO ที่ตรงกับเงื่อนไข';
+    }
+
+    /**
+     * ============================================================================
+     * 6. มุมมองที่ 1: มุมมองตาม PLO (Default View)
+     * ============================================================================
+     */
+    function renderPLOView(filteredCourses) {
+      const targetPLOs = state.selectedPLOs.length > 0
+        ? PLOS.filter(p => state.selectedPLOs.includes(p.id))
+        : PLOS;
+
+      const targetYears = state.selectedYears.length > 0
+        ? state.selectedYears.slice().sort((a, b) => a - b)
+        : [1, 2, 3, 4];
+
+      let html = '';
+      let renderedCount = 0;
+
+      targetPLOs.forEach(plo => {
+        // ค้นหารายวิชาที่เชื่อมโยงกับ PLO นี้
+        const ploCourses = filteredCourses
+          .map(c => ({
+            ...c,
+            ploCLOs: c.matchedCLOs.filter(clo => clo.plos.includes(plo.id))
+          }))
+          .filter(c => c.ploCLOs.length > 0);
+
+        // หากมีการกรองเฉพาะรายวิชาหรือคำค้นหา ให้ซ่อน PLO ที่ไม่มีผลลัพธ์
+        if (ploCourses.length === 0 && (state.searchQuery || state.selectedCourse || state.selectedYears.length > 0 || state.courseType === 'elective')) {
+          return;
+        }
+
+        renderedCount++;
+        const isWatchlist = mandatoryCourseCountByPLO[plo.id] === 1;
+        const totalCLOsInPLO = ploCourses.reduce((sum, c) => sum + c.ploCLOs.length, 0);
+
+        html += `
+          <article class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden print-break-inside-avoid">
+            <!-- ส่วนหัวการ์ด PLO -->
+            <div class="bg-gradient-to-r from-navy to-slatebrand px-5 py-4 text-white">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-white/15 font-heading font-semibold text-sm tracking-wide">
+                      ${plo.id}
+                    </span>
+                    ${isWatchlist ? `
+                      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-400/20 text-amber-100 border border-amber-300/40">
+                        <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        จุดเฝ้าระวัง: มีวิชาบังคับเพียง 1 รายวิชา
+                      </span>
+                    ` : ''}
+                  </div>
+                  <h2 class="text-base sm:text-lg font-heading font-medium mt-1.5 leading-snug">
+                    ${escapeHtml(plo.desc)}
+                  </h2>
+                </div>
+                <div class="shrink-0 text-xs sm:text-sm bg-white/10 px-3 py-1.5 rounded-xl text-blue-50 self-start">
+                  <strong>${ploCourses.length}</strong> รายวิชา • <strong>${totalCLOsInPLO}</strong> CLO
+                </div>
+              </div>
+            </div>
+
+            <!-- เนื้อหาแยกตามชั้นปี -->
+            <div class="p-4 sm:p-5 divide-y divide-slate-100">
+        `;
+
+        targetYears.forEach(yr => {
+          const yrCourses = ploCourses.filter(c => c.year === yr);
+
+          // ถ้าไม่มีวิชาในชั้นปีนี้ ให้แสดงข้อความแบบกระชับ
+          if (yrCourses.length === 0) {
+            html += `
+              <div class="py-2.5 first:pt-0 last:pb-0 flex items-center gap-3 text-sm text-slate-400">
+                <span class="inline-flex items-center justify-center w-16 py-0.5 rounded-lg bg-slate-100 text-slate-500 font-heading text-xs font-semibold shrink-0">
+                  ชั้นปีที่ ${yr}
+                </span>
+                <span class="italic">ไม่มีรายวิชาที่รับผิดชอบตามเงื่อนไขที่เลือก</span>
+              </div>
+            `;
+            return;
+          }
+
+          html += `
+            <div class="py-3.5 first:pt-0 last:pb-0">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slatebrand-light text-navy font-heading text-xs font-semibold">
+                  ชั้นปีที่ ${yr}
+                </span>
+                <span class="text-xs text-slate-400">(${yrCourses.length} รายวิชา)</span>
+              </div>
+              <div class="space-y-3 pl-0 sm:pl-3">
+          `;
+
+          yrCourses.forEach(c => {
+            html += `
+              <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 hover:border-slatebrand/40 transition">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <span class="font-heading font-semibold text-navy text-sm sm:text-base">
+                    ${highlightText(c.code, state.searchQuery)} ${highlightText(c.name, state.searchQuery)}
+                  </span>
+                  ${getCourseTypeBadge(c.type)}
+                </div>
+                <ul class="space-y-1.5 text-sm text-slate-700">
+            `;
+            c.ploCLOs.forEach(clo => {
+              // แสดงแท็ก PLO อื่นเพิ่มเติมกรณี CLO เชื่อมโยงมากกว่า 1 PLO
+              const otherPLOs = clo.plos.filter(p => p !== plo.id);
+              const sharedBadge = otherPLOs.length > 0
+                ? `<span class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">เชื่อมโยงร่วม: ${otherPLOs.join(', ')}</span>`
+                : '';
+
+              html += `
+                <li class="flex items-start gap-2 leading-relaxed">
+                  <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slatebrand font-heading font-semibold text-xs shrink-0 mt-0.5">
+                    ${clo.id}
+                  </span>
+                  <span>
+                    ${highlightText(clo.text, state.searchQuery)}${sharedBadge}
+                  </span>
+                </li>
+              `;
+            });
+            html += `
+                </ul>
+              </div>
+            `;
+          });
+
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </article>
+        `;
+      });
+
+      if (renderedCount === 0) {
+        return renderEmptyState();
+      }
+      return html;
+    }
+
+    /**
+     * ============================================================================
+     * 7. มุมมองที่ 2: มุมมองตามรายวิชา (Course View)
+     * ============================================================================
+     */
+    function renderCourseView(filteredCourses) {
+      if (filteredCourses.length === 0) {
+        return renderEmptyState();
+      }
+
+      const targetYears = state.selectedYears.length > 0
+        ? state.selectedYears.slice().sort((a, b) => a - b)
+        : [1, 2, 3, 4];
+
+      let html = '';
+
+      targetYears.forEach(yr => {
+        const yrCourses = filteredCourses.filter(c => c.year === yr);
+        if (yrCourses.length === 0) return;
+
+        html += `
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <h2 class="text-lg font-heading font-semibold text-navy">ชั้นปีที่ ${yr}</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-navy/10 text-navy">
+                ${yrCourses.length} รายวิชา
+              </span>
+              <div class="flex-1 h-px bg-slate-200"></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        `;
+
+        yrCourses.forEach(c => {
+          html += `
+            <article class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 flex flex-col justify-between hover:border-slatebrand/40 transition print-break-inside-avoid">
+              <div>
+                <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-navy text-white font-heading font-semibold text-xs">
+                        ${highlightText(c.code, state.searchQuery)}
+                      </span>
+                      ${getCourseTypeBadge(c.type)}
+                    </div>
+                    <h3 class="text-base font-heading font-semibold text-slate-900 mt-1.5">
+                      ${highlightText(c.name, state.searchQuery)}
+                    </h3>
+                  </div>
+                  <span class="text-xs text-slate-400 shrink-0 mt-1">${c.matchedCLOs.length} CLO</span>
+                </div>
+
+                <ul class="mt-3 space-y-2.5 text-sm text-slate-700">
+          `;
+
+          c.matchedCLOs.forEach(clo => {
+            const ploTags = clo.plos.map(p => {
+              const isSelected = state.selectedPLOs.includes(p);
+              return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-heading font-medium ${
+                isSelected
+                  ? 'bg-navy text-white'
+                  : 'bg-slatebrand-light text-slatebrand border border-slatebrand/20'
+              }">(${p})</span>`;
+            }).join(' ');
+
+            html += `
+              <li class="flex items-start gap-2.5 leading-relaxed">
+                <span class="font-heading font-semibold text-xs text-navy bg-slate-100 px-2 py-0.5 rounded-md shrink-0 mt-0.5">
+                  ${clo.id}
+                </span>
+                <div class="flex-1">
+                  <span>${highlightText(clo.text, state.searchQuery)}</span>
+                  <span class="inline-flex flex-wrap gap-1 ml-1 align-middle">${ploTags}</span>
+                </div>
+              </li>
+            `;
+          });
+
+          html += `
+                </ul>
+              </div>
+            </article>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      return html;
+    }
+
+    /**
+     * ============================================================================
+     * 8. มุมมองที่ 3: ตารางเมทริกซ์ (PLO × ชั้นปี) — คลิกเจาะลึกได้ทันที
+     * ============================================================================
+     */
+    function renderMatrixView(filteredCourses) {
+      const targetPLOs = state.selectedPLOs.length > 0
+        ? PLOS.filter(p => state.selectedPLOs.includes(p.id))
+        : PLOS;
+
+      let rowsHtml = '';
+
+      targetPLOs.forEach(plo => {
+        const isWatchlist = mandatoryCourseCountByPLO[plo.id] === 1;
+        let rowCoursesTotal = 0;
+        let rowCLOsTotal = 0;
+        let cellsHtml = '';
+
+        [1, 2, 3, 4].forEach(yr => {
+          const matchedInCell = filteredCourses
+            .filter(c => c.year === yr)
+            .map(c => ({
+              code: c.code,
+              clos: c.matchedCLOs.filter(clo => clo.plos.includes(plo.id))
+            }))
+            .filter(c => c.clos.length > 0);
+
+          const cCount = matchedInCell.length;
+          const cloCount = matchedInCell.reduce((sum, c) => sum + c.clos.length, 0);
+          rowCoursesTotal += cCount;
+          rowCLOsTotal += cloCount;
+
+          if (cCount > 0) {
+            cellsHtml += `
+              <td class="p-2.5 text-center border-b border-slate-100">
+                <button
+                  type="button"
+                  data-drill-plo="${plo.id}"
+                  data-drill-year="${yr}"
+                  class="matrix-cell-btn w-full py-2 px-2 rounded-xl bg-slatebrand-light/70 hover:bg-navy hover:text-white text-navy transition cursor-pointer group"
+                  title="คลิกเพื่อดูรายละเอียด ${plo.id} ชั้นปีที่ ${yr}"
+                >
+                  <div class="font-heading font-bold text-sm leading-tight">${cCount} วิชา</div>
+                  <div class="text-[11px] text-slatebrand group-hover:text-blue-200 mt-0.5">${cloCount} CLO</div>
+                </button>
+              </td>
+            `;
+          } else {
+            cellsHtml += `
+              <td class="p-2.5 text-center border-b border-slate-100 text-slate-300 text-sm">
+                –
+              </td>
+            `;
+          }
+        });
+
+        rowsHtml += `
+          <tr class="${isWatchlist ? 'bg-amber-50/50' : 'hover:bg-slate-50/80'} transition">
+            <td class="p-3.5 border-b border-slate-100 align-middle">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-drill-plo="${plo.id}"
+                  data-drill-year="all"
+                  class="matrix-cell-btn font-heading font-semibold text-sm text-navy hover:text-slatebrand underline-offset-2 hover:underline cursor-pointer"
+                >
+                  ${plo.id}
+                </button>
+                ${isWatchlist ? `
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200" title="มีวิชาบังคับเพียง 1 รายวิชาตลอดหลักสูตร">
+                    เฝ้าระวัง
+                  </span>
+                ` : ''}
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">${escapeHtml(plo.desc)}</p>
+            </td>
+            ${cellsHtml}
+            <td class="p-3 text-center border-b border-slate-100 bg-slate-50/70">
+              <div class="font-heading font-bold text-sm text-navy">${rowCoursesTotal} วิชา</div>
+              <div class="text-xs text-slate-500">${rowCLOsTotal} CLO</div>
+            </td>
+          </tr>
+        `;
+      });
+
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 class="font-heading font-semibold text-navy text-base sm:text-lg">
+                ตารางเมทริกซ์สรุปความเชื่อมโยง (PLO × ชั้นปี)
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500">
+                คลิกที่ช่องตัวเลขใดก็ได้ เพื่อสลับไปดูรายละเอียดรายวิชาและ CLO ของ PLO และชั้นปีนั้นทันที
+              </p>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl shrink-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              แถบสีเหลืองอ่อน = PLO ที่มีวิชาบังคับเพียง 1 รายวิชา
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[680px] border-collapse text-left">
+              <thead>
+                <tr class="bg-navy text-white text-xs sm:text-sm font-heading">
+                  <th class="p-3.5 font-medium w-[38%]">PLO และคำอธิบาย</th>
+                  <th class="p-3.5 font-medium text-center w-[12%]">ชั้นปีที่ 1</th>
+                  <th class="p-3.5 font-medium text-center w-[12%]">ชั้นปีที่ 2</th>
+                  <th class="p-3.5 font-medium text-center w-[12%]">ชั้นปีที่ 3</th>
+                  <th class="p-3.5 font-medium text-center w-[12%]">ชั้นปีที่ 4</th>
+                  <th class="p-3.5 font-medium text-center w-[14%] bg-navy-dark">รวมทั้งหมด</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEmptyState() {
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-10 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
+          </div>
+          <h3 class="font-heading font-semibold text-slate-800 text-base">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการคัดกรอง</h3>
+          <p class="text-sm text-slate-500 mt-1">ลองปรับเปลี่ยนประเภทวิชา ชั้นปี PLO หรือล้างคำค้นหาเพื่อดูข้อมูลเพิ่มเติม</p>
+          <button
+            type="button"
+            onclick="resetAllFilters()"
+            class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-navy text-white text-sm font-medium hover:bg-navy-dark transition cursor-pointer"
+          >
+            ล้างตัวกรองทั้งหมด
+          </button>
+        </div>
+      `;
+    }
+
+    /**
+     * ============================================================================
+     * 9. ฟังก์ชันหลักในการเรนเดอร์และผูก Event Listeners
+     * ============================================================================
+     */
+    function renderAll() {
+      updateFilterUI();
+      const filteredCourses = getFilteredCourses();
+      renderKPIs(filteredCourses);
+
+      const contentArea = document.getElementById('contentArea');
+      if (state.activeTab === 'plo') {
+        contentArea.innerHTML = renderPLOView(filteredCourses);
+      } else if (state.activeTab === 'course') {
+        contentArea.innerHTML = renderCourseView(filteredCourses);
+      } else {
+        contentArea.innerHTML = renderMatrixView(filteredCourses);
+      }
+    }
+
+    function resetAllFilters() {
+      state.courseType = 'mandatory';
+      state.selectedYears = [];
+      state.selectedPLOs = [];
+      state.selectedCourse = '';
+      state.searchQuery = '';
+      document.getElementById('searchInput').value = '';
+      renderAll();
+    }
+
+    function bindEvents() {
+      // ปุ่มเลือกประเภทวิชา
+      document.getElementById('courseTypeGroup').addEventListener('click', (e) => {
+        const btn = e.target.closest('.type-btn');
+        if (!btn) return;
+        state.courseType = btn.dataset.type;
+        renderAll();
+      });
+
+      // ปุ่มเลือกชั้นปี (Multi-select)
+      document.getElementById('yearFilterGroup').addEventListener('click', (e) => {
+        const btn = e.target.closest('.year-btn');
+        if (!btn) return;
+        const val = btn.dataset.year;
+
+        if (val === 'all') {
+          state.selectedYears = [];
+        } else {
+          const yr = Number(val);
+          const idx = state.selectedYears.indexOf(yr);
+          if (idx > -1) {
+            state.selectedYears.splice(idx, 1);
+          } else {
+            state.selectedYears.push(yr);
+          }
+          if (state.selectedYears.length === 4) {
+            state.selectedYears = [];
+          }
+        }
+        renderAll();
+      });
+
+      // Dropdown เลือกรายวิชาเฉพาะ
+      document.getElementById('courseSelect').addEventListener('change', (e) => {
+        state.selectedCourse = e.target.value;
+        renderAll();
+      });
+
+      // ช่องค้นหาคำสำคัญแบบเรียลไทม์
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        renderAll();
+      });
+
+      document.getElementById('btnClearSearch').addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        searchInput.focus();
+        renderAll();
+      });
+
+      // แท็บสลับมุมมอง
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeTab = btn.dataset.tab;
+          renderAll();
+        });
+      });
+
+      // การคลิกเจาะลึกจากตารางเมทริกซ์ (Event Delegation)
+      document.getElementById('contentArea').addEventListener('click', (e) => {
+        const cellBtn = e.target.closest('.matrix-cell-btn');
+        if (!cellBtn) return;
+        const plo = cellBtn.dataset.drillPlo;
+        const yr = cellBtn.dataset.drillYear;
+
+        state.selectedPLOs = [plo];
+        state.selectedYears = yr === 'all' ? [] : [Number(yr)];
+        state.activeTab = 'plo';
+        renderAll();
+
+        // เลื่อนขึ้นไปยังส่วนแสดงผลอย่างนุ่มนวล
+        document.getElementById('contentArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      // ปุ่มล้างตัวกรอง และ ปุ่มพิมพ์รายงาน
+      document.getElementById('btnResetTop').addEventListener('click', resetAllFilters);
+      document.getElementById('btnPrint').addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    // เริ่มต้นการทำงานเมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+    window.addEventListener('DOMContentLoaded', () => {
+      initPLOChips();
+      bindEvents();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
