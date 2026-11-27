@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบรายงานผลสัมฤทธิ์ของผู้เรียน (OBE Achievement Dashboard) | หลักสูตร 436</title>
+
+  <!-- Google Fonts: Prompt (หัวข้อ) และ Sarabun (เนื้อหา) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#006242',
+            'navy-dark': '#112440',
+            slatebrand: '#2F5E8A',
+            'slatebrand-light': '#E8F0F8',
+            bgsoft: '#F4F7FA',
+            pass: '#10B981',
+            'pass-bg': '#ECFDF5',
+            fail: '#EF4444',
+            'fail-bg': '#FEF2F2',
+          },
+          fontFamily: {
+            heading: ['Prompt', 'sans-serif'],
+            sans: ['Sarabun', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #F4F7FA;
+      color: #1E293B;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Prompt', sans-serif;
+    }
+
+    /* Custom Range Slider สำหรับ Simulation Mode */
+    input[type="range"].sim-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 9999px;
+      background: #CBD5E1;
+      outline: none;
+    }
+    input[type="range"].sim-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #1B365D;
+      cursor: pointer;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+    /* การจัดหน้าสำหรับพิมพ์รายงาน / บันทึก PDF */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 10mm;
+      }
+      body {
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-break-inside-avoid {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .shadow-sm, .shadow, .shadow-md, .shadow-lg {
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- ================= ส่วนหัวเว็บไซต์ (Executive Academic Header) ================= -->
+  <header class="bg-navy text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/15 text-blue-100 text-xs font-medium border border-white/10">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              หลักสูตรสารสนเทศศาสตร์ (รหัส 436)
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-200 text-xs font-medium border border-amber-300/30">
+              เกณฑ์ผ่าน CLO: Rubric ระดับ 2–3 ≥ 80.00%
+            </span>
+          </div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-heading font-semibold tracking-tight">
+            ระบบรายงานผลสัมฤทธิ์ของผู้เรียน (OBE Achievement Dashboard)
+          </h1>
+          <p class="text-blue-100/90 text-sm sm:text-base mt-1">
+            ต้นแบบระบบติดตามผลลัพธ์การเรียนรู้ระดับ CLO • YLO รายชั้นปี • PLO เพื่อการประชุมและพัฒนาหลักสูตร (CQI)
+          </p>
+        </div>
+
+        <!-- ปุ่มควบคุมด้านขวา (Simulation Mode + Reset + Print) -->
+        <div class="flex flex-wrap items-center gap-2.5 no-print shrink-0">
+          <!-- ปุ่มเปิด/ปิดโหมดทดลองปรับคะแนน -->
+          <button
+            id="btnToggleSim"
+            type="button"
+            class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium transition cursor-pointer border border-white/20 bg-white/10 hover:bg-white/20 text-white"
+            title="เปิดโหมดทดลองปรับคะแนน CLO เพื่อดูผลกระทบต่อ YLO และ PLO แบบเรียลไทม์"
+          >
+            <span id="simDot" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition"></span>
+            <span id="simLabel">โหมดทดลองปรับคะแนน: ปิด</span>
+          </button>
+
+          <!-- ปุ่มรีเซ็ตคะแนนเมื่อมีการแก้ไข -->
+          <button
+            id="btnResetScores"
+            type="button"
+            class="hidden inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-amber-400 text-navy-dark hover:bg-amber-300 transition cursor-pointer shadow-sm"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>รีเซ็ตข้อมูลเริ่มต้น</span>
+          </button>
+
+          <!-- ปุ่มพิมพ์รายงาน / PDF -->
+          <button
+            id="btnPrint"
+            type="button"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-navy hover:bg-blue-50 text-sm font-semibold shadow-sm transition cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>พิมพ์รายงาน / PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- แถบแจ้งเตือนเมื่อเปิด Simulation Mode -->
+  <div id="simBanner" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>
+          <strong>โหมดทดลองปรับคะแนน (Simulation Mode) เปิดใช้งานอยู่:</strong> คุณสามารถเลื่อนแถบหรือพิมพ์ตัวเลข % ของ CLO ในแท็บ <em>รายงานรายวิชา</em>, <em>รายการ CQI</em> หรือ <em>การ์ด 436 403</em> เพื่อจำลองผลกระทบต่อกราฟ YLO และ PLO ได้ทันที
+        </span>
+      </div>
+      <span id="simModifiedCount" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-200/70 text-amber-900 shrink-0">
+        ปรับแก้ไขแล้ว 0 รายการ
+      </span>
+    </div>
+  </div>
+
+  <!-- ================= พื้นที่เนื้อหาหลัก (Main Content) ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- สรุปเงื่อนไขที่แสดง (เฉพาะตอนสั่งพิมพ์) -->
+    <div id="printFilterSummary" class="hidden print-only border border-slate-300 rounded-xl p-3 text-sm bg-slate-50"></div>
+
+    <!-- ================= แผงควบคุมการคัดกรอง (Interactive Filter Bar) ================= -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 space-y-4 no-print" aria-label="แผงคัดกรองข้อมูล">
+      <!-- แถว 1: ประเภทวิชา + ชั้นปี + สถานะเกณฑ์ -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- ประเภทรายวิชา -->
+        <div class="lg:col-span-4">
+          <label class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            ประเภทรายวิชา
+          </label>
+          <div class="flex flex-wrap gap-1.5" id="courseTypeGroup">
+            <button type="button" data-type="all" class="type-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">
+              ทั้งหมด (40)
+            </button>
+            <button type="button" data-type="mandatory" class="type-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">
+              วิชาบังคับ (17)
+            </button>
+            <button type="button" data-type="elective" class="type-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">
+              วิชาเลือก (23)
+            </button>
+          </div>
+        </div>
+
+        <!-- ชั้นปี (YLO) -->
+        <div class="lg:col-span-4">
+          <label class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            ชั้นปี (YLO) — เลือกได้หลายชั้นปี
+          </label>
+          <div class="flex flex-wrap gap-1.5" id="yearFilterGroup">
+            <button type="button" data-year="all" class="year-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ทั้งหมด</button>
+            <button type="button" data-year="1" class="year-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ปี 1</button>
+            <button type="button" data-year="2" class="year-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ปี 2</button>
+            <button type="button" data-year="3" class="year-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ปี 3</button>
+            <button type="button" data-year="4" class="year-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ปี 4</button>
+          </div>
+        </div>
+
+        <!-- สถานะเกณฑ์ CLO -->
+        <div class="lg:col-span-4">
+          <label class="block text-xs font-heading font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            สถานะเกณฑ์ (Rubric ระดับ 2–3)
+          </label>
+          <div class="flex flex-wrap gap-1.5" id="statusFilterGroup">
+            <button type="button" data-status="all" class="status-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ทั้งหมด</button>
+            <button type="button" data-status="pass" class="status-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ผ่านเกณฑ์ (≥80%)</button>
+            <button type="button" data-status="fail" class="status-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ต่ำกว่าเกณฑ์ (&lt;80%)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- แถว 2: คัดกรองระดับ PLO (Pills) -->
+      <div class="pt-3 border-t border-slate-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <label class="text-xs font-heading font-semibold uppercase tracking-wider text-slate-500">
+            ระดับ PLO (เลือกได้หลายรายการ)
+          </label>
+          <span id="ploSelectedHint" class="text-xs text-slatebrand font-medium">แสดงทั้งหมด (PLO11 – PLO19)</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5" id="ploChipGroup"></div>
+      </div>
+
+      <!-- แถว 3: ค้นหา + ปุ่มล้างตัวกรอง -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100">
+        <div class="relative flex-1">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
+          </div>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="ค้นหารหัสวิชา ชื่อรายวิชา หรือคำสำคัญใน CLO (เช่น 436 403, เมทาดาทา, โปรโตคอล, จริยธรรม)..."
+            class="w-full bg-slate-50 border border-slate-200 hover:border-slatebrand/60 focus:border-slatebrand focus:ring-2 focus:ring-slatebrand/20 rounded-xl pl-10 pr-9 py-2.5 text-sm text-slate-800 outline-none transition"
+          />
+          <button
+            id="btnClearSearch"
+            type="button"
+            class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+            aria-label="ล้างคำค้นหา"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <button
+          id="btnResetFilters"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shrink-0"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <span>ล้างตัวกรอง</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= แท็บนำทาง 4 มุมมองหลัก (Navigation Tabs) ================= -->
+    <nav class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-2 lg:grid-cols-4 gap-1.5 no-print" role="tablist" aria-label="มุมมองรายงาน">
+      <button type="button" role="tab" data-tab="overview" class="tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium transition cursor-pointer">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span class="truncate">1. ภาพรวม &amp; YLO</span>
+      </button>
+      <button type="button" role="tab" data-tab="matrix" class="tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium transition cursor-pointer">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <span class="truncate">2. เมทริกซ์ PLO × ชั้นปี</span>
+      </button>
+      <button type="button" role="tab" data-tab="courses" class="tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium transition cursor-pointer">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span class="truncate">3. รายงานรายวิชา &amp; CLO</span>
+      </button>
+      <button type="button" role="tab" data-tab="cqi" class="tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium transition cursor-pointer">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span class="truncate">4. เฝ้าระวังและปรับปรุง (CQI)</span>
+        <span id="cqiTabBadge" class="px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-700">0</span>
+      </button>
+    </nav>
+
+    <!-- ================= พื้นที่แสดงผลของแต่ละแท็บ ================= -->
+
+    <!-- แท็บ 1: ภาพรวม & YLO รายชั้นปี -->
+    <section id="tab-overview" class="tab-panel space-y-6">
+      <!-- KPI 4 การ์ด -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" id="kpiGrid"></div>
+
+      <!-- การ์ด Spotlight พิเศษ: ข้อมูลจริง 436 403 -->
+      <div id="spotlightCard" class="print-break-inside-avoid"></div>
+
+      <!-- ส่วนสรุป YLO รายชั้นปี (4 การ์ด) -->
+      <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <div>
+            <h2 class="text-lg font-heading font-semibold text-navy">
+              สรุปผลลัพธ์การเรียนรู้รายชั้นปี (YLO: Year Learning Outcomes)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              แสดงอัตราการบรรลุ CLO (≥80%) แยกตามชั้นปีและราย PLO — คลิกที่การ์ดชั้นปีเพื่อคัดกรองดูรายละเอียดของชั้นปีนั้นทันที
+            </p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4" id="yloGrid"></div>
+      </div>
+
+      <!-- กราฟ Interactive 2 กราฟ (Chart.js) -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 print-break-inside-avoid">
+        <!-- กราฟแท่งแนวนอน PLO11-PLO19 -->
+        <div class="xl:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-heading font-semibold text-navy text-base">
+                อัตราการบรรลุผลลัพธ์การเรียนรู้ระดับหลักสูตร (PLO11 – PLO19)
+              </h3>
+              <p class="text-xs text-slate-500">ร้อยละของ CLO ที่ผ่านเกณฑ์ (≥80%) เทียบกับเส้นมาตรฐาน 80%</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+              <span class="w-4 border-t-2 border-dashed border-amber-500"></span>
+              เกณฑ์ 80%
+            </span>
+          </div>
+          <div class="relative h-[340px] w-full">
+            <canvas id="ploChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- กราฟแท่ง YLO รายชั้นปี (ผ่าน vs ต้องปรับปรุง) -->
+        <div class="xl:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+          <div class="mb-4">
+            <h3 class="font-heading font-semibold text-navy text-base">
+              เปรียบเทียบจำนวน CLO รายชั้นปี (YLO ปี 1 – ปี 4)
+            </h3>
+            <p class="text-xs text-slate-500">เปรียบเทียบจำนวน CLO ที่ผ่านเกณฑ์ (≥80%) กับต่ำกว่าเกณฑ์ (&lt;80%)</p>
+          </div>
+          <div class="relative h-[340px] w-full">
+            <canvas id="yloChartCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- แท็บ 2: เมทริกซ์ PLO × ชั้นปี -->
+    <section id="tab-matrix" class="tab-panel hidden space-y-4">
+      <div id="matrixContainer"></div>
+    </section>
+
+    <!-- แท็บ 3: รายงานระดับรายวิชา & CLO -->
+    <section id="tab-courses" class="tab-panel hidden space-y-4">
+      <div id="coursesContainer"></div>
+    </section>
+
+    <!-- แท็บ 4: รายการเฝ้าระวังและปรับปรุง (CQI Action List) -->
+    <section id="tab-cqi" class="tab-panel hidden space-y-4">
+      <div id="cqiContainer"></div>
+    </section>
+
+  </main>
+
+  <!-- ================= หน้าต่าง Modal เจาะลึกข้อมูลจากตารางเมทริกซ์ ================= -->
+  <div id="drillModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true" aria-labelledby="drillModalTitle">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="bg-navy text-white px-5 py-4 flex items-start justify-between gap-4">
+        <div>
+          <span id="drillModalTag" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/15 text-blue-100 mb-1"></span>
+          <h3 id="drillModalTitle" class="font-heading font-semibold text-lg"></h3>
+          <p id="drillModalSub" class="text-xs sm:text-sm text-blue-100/90 mt-0.5"></p>
+        </div>
+        <button id="btnCloseModal" type="button" class="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition cursor-pointer" aria-label="ปิดหน้าต่าง">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="drillModalBody" class="p-5 overflow-y-auto space-y-3 flex-1 bg-slate-50/50"></div>
+      <div class="px-5 py-3.5 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+        <button id="btnModalJumpToCourses" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-navy text-white hover:bg-navy-dark text-sm font-medium transition cursor-pointer">
+          <span>เปิดดูในแท็บรายงานรายวิชา</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </button>
+        <button id="btnCloseModalFooter" type="button" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Toast Notification (แทน alert) ================= -->
+  <div id="toastBox" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-xl bg-navy text-white text-sm shadow-lg border border-white/10 no-print">
+    <span id="toastText"></span>
+  </div>
+
+  <!-- ================= ส่วนท้ายเว็บไซต์ (Footer) ================= -->
+  <footer class="mt-10 border-t border-slate-200 bg-white/80 py-5 text-center text-xs sm:text-sm text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      หลักสูตรสารสนเทศศาสตร์ (รหัส 436) • ระบบรายงานผลสัมฤทธิ์ของผู้เรียน (OBE Achievement Dashboard) • เกณฑ์ผ่านระดับ CLO: ผู้เรียนระดับ Rubric 2–3 ≥ 80.00%
+    </div>
+  </footer>
+
+  <!-- ================= สคริปต์ข้อมูลและระบบ Dashboard ทั้งหมด ================= -->
+  <script>
+    /**
+     * ============================================================================
+     * 1. ค่าคงที่และข้อมูลหลักสูตรครบทั้ง 9 PLOs และ 40 รายวิชา (141 CLOs)
+     *    - ข้อมูลจริง 100%: 436 403 การค้นคืนสารสนเทศดิจิทัล (isReal: true)
+     *    - ข้อมูลตัวอย่างคงที่สมจริง (65%–96%): อีก 39 รายวิชา (isReal: false)
+     * ============================================================================
+     */
+    const PASS_THRESHOLD = 80.0;
+
+    const PLOS = [
+      { id: 'PLO11', short: 'บริหารจัดการองค์กร & ระบบสารสนเทศ', desc: 'เข้าใจการบริหารจัดการองค์กร และระบบสารสนเทศภายในองค์กร' },
+      { id: 'PLO12', short: 'จัดหาและรวบรวมสารสนเทศ', desc: 'ดำเนินการจัดหาและรวบรวมสารสนเทศได้' },
+      { id: 'PLO13', short: 'จัดโครงสร้าง จัดเก็บและค้นคืน', desc: 'จัดโครงสร้างสารสนเทศและพัฒนาระบบสารสนเทศเพื่อการจัดเก็บและค้นคืนได้' },
+      { id: 'PLO14', short: 'ทักษะการนำเสนอข้อมูลรูปแบบต่างๆ', desc: 'มีทักษะในการนำเสนอข้อมูลรูปแบบต่างๆ' },
+      { id: 'PLO15', short: 'จัดบริการสารสนเทศตรงความต้องการผู้ใช้', desc: 'ระบุการจัดบริการสารสนเทศที่สอดคล้องกับความต้องการของผู้ใช้' },
+      { id: 'PLO16', short: 'เลือกใช้เทคโนโลยีสารสนเทศให้ตรงวัตถุประสงค์', desc: 'รู้จักและเลือกใช้เทคโนโลยีสารสนเทศให้สอดคล้องกับวัตถุประสงค์ของงานสารสนเทศ' },
+      { id: 'PLO17', short: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์', desc: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์ในงานสารสนเทศ' },
+      { id: 'PLO18', short: 'จัดการสารสนเทศศิลปะและมรดกวัฒนธรรม', desc: 'อธิบายหลักการจัดการสารสนเทศทางศิลปะและมรดกทางวัฒนธรรม' },
+      { id: 'PLO19', short: 'จริยธรรม กฎหมาย และการทำงานร่วมกับผู้อื่น', desc: 'แสดงออกซึ่งทักษะความสัมพันธ์ระหว่างบุคคล สามารถทำงานร่วมกับผู้อื่นได้ มีระเบียบวินัย ซื่อสัตย์สุจริต มีความรับผิดชอบต่อตนเองและสังคม' }
+    ];
+
+    // ข้อมูลรายวิชาต้นฉบับ (เก็บไว้สำหรับการรีเซ็ตใน Simulation Mode)
+    const INITIAL_COURSES = [
+      {
+        code: '436 101', name: 'เทคโนโลยีสารสนเทศและการสื่อสาร', year: 1, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความหมาย ความสำคัญและองค์ประกอบของเทคโนโลยีสารสนเทศและการสื่อสารในระดับที่แตกต่างกันในองค์กรและสังคม', plos: ['PLO11'], score: 88.50 },
+          { id: 'CLO2', text: 'ยกตัวอย่างการประยุกต์ใช้เทคโนโลยีสารสนเทศและการสื่อสารในงานด้านต่าง ๆ ได้', plos: ['PLO16'], score: 91.20 },
+          { id: 'CLO3', text: 'อธิบายแนวโน้มการใช้เทคโนโลยีสารสนเทศและการสื่อสารรวมถึงผลกระทบได้', plos: ['PLO16'], score: 84.00 },
+          { id: 'CLO4', text: 'ระบุการใช้เทคโนโลยีสารสนเทศและการสื่อสารอย่างมีจริยธรรมและถูกกฎหมาย เช่น พรบ.คอมพิวเตอร์ ได้', plos: ['PLO19'], score: 93.40 }
+        ]
+      },
+      {
+        code: '436 102', name: 'สารสนเทศศาสตร์และบรรณารักษศาสตร์เบื้องต้น', year: 1, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความหมาย ความสำคัญ พัฒนาการของสารสนเทศ และความสัมพันธ์ของสารสนเทศกับวิชาอื่น ๆ', plos: ['PLO11'], score: 86.75 },
+          { id: 'CLO2', text: 'รู้จักประเภท และแหล่งสารสนเทศ', plos: ['PLO11'], score: 90.00 },
+          { id: 'CLO3', text: 'รู้และเข้าใจการใช้เทคโนโลยีกับงานสารสนเทศ ตลอดจนปัญหาและแนวโน้มที่เกี่ยวข้องกับสารสนเทศ', plos: ['PLO16'], score: 76.50 },
+          { id: 'CLO4', text: 'รู้จักองค์กรวิชาชีพทางสารสนเทศ จริยธรรม และกฎหมายสำคัญในงานสารสนเทศ เช่น พรบ.ลิขสิทธิ์', plos: ['PLO19'], score: 89.10 }
+        ]
+      },
+      {
+        code: '436 201', name: 'แหล่งสารสนเทศ', year: 2, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักหลักการเลือกแหล่งสารสนเทศประเภทต่างๆ', plos: ['PLO12'], score: 87.20 },
+          { id: 'CLO2', text: 'อธิบายขั้นตอนการใช้งานแหล่งสารสนเทศประเภทต่างๆ', plos: ['PLO12'], score: 83.60 },
+          { id: 'CLO3', text: 'เลือกใช้เทคนิคการสืบค้นที่เหมาะสมกับความต้องการสารสนเทศได้', plos: ['PLO13'], score: 74.80 }
+        ]
+      },
+      {
+        code: '436 202', name: 'การพัฒนาทรัพยากรสารสนเทศ', year: 2, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎีการพัฒนาทรัพยากรสารสนเทศได้', plos: ['PLO12'], score: 85.40 },
+          { id: 'CLO2', text: 'ระบุวิธีกระบวนการในพัฒนาทรัพยากรสารสนเทศที่เหมาะสมได้', plos: ['PLO12'], score: 81.90 },
+          { id: 'CLO3', text: 'ยกตัวอย่างการจัดหาสารสนเทศอย่างมีจริยธรรม และถูกกฎหมายได้', plos: ['PLO19'], score: 92.00 }
+        ]
+      },
+      {
+        code: '436 203', name: 'การออกแบบกราฟิกในงานสารสนเทศ', year: 2, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดการออกแบบกราฟิกได้', plos: ['PLO14'], score: 90.50 },
+          { id: 'CLO2', text: 'ออกแบบชิ้นงานกราฟิกเพื่อนำเสนอสารสนเทศได้', plos: ['PLO14'], score: 86.25 },
+          { id: 'CLO3', text: 'ใช้เครื่องมือในการออกแบบกราฟิกและสร้างชิ้นงานได้', plos: ['PLO16'], score: 88.00 },
+          { id: 'CLO4', text: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์ในการสร้างชิ้นงานกราฟิกได้', plos: ['PLO17'], score: 82.40 }
+        ]
+      },
+      {
+        code: '436 211', name: 'อินเทอร์เน็ตและการสืบค้น', year: 2, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักและเลือกใช้เครื่องมือการสืบค้น', plos: ['PLO13'], score: 91.00 },
+          { id: 'CLO2', text: 'ใช้กลยุทธ์ในการสืบค้นสารสนเทศได้', plos: ['PLO13'], score: 84.50 },
+          { id: 'CLO3', text: 'ประเมินค่าสารสนเทศที่ค้นได้', plos: ['PLO13'], score: 77.20 },
+          { id: 'CLO4', text: 'อธิบายกฎหมายและจริยธรรมการใช้สารสนเทศบนอินเทอร์เน็ตได้', plos: ['PLO19'], score: 89.60 }
+        ]
+      },
+      {
+        code: '436 231', name: 'การส่งเสริมการอ่านในศตวรรษที่ 21', year: 2, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'เข้าใจจิตวิทยาทางการอ่านและทักษะการอ่าน', plos: ['PLO15'], score: 88.30 },
+          { id: 'CLO2', text: 'เลือกทรัพยากรการอ่านที่เหมาะสมกับผู้อ่านได้', plos: ['PLO15'], score: 92.10 },
+          { id: 'CLO3', text: 'มีทักษะในการทำงานร่วมกับผู้อื่นเพื่อจัดกิจกรรมส่งเสริมการอ่านได้', plos: ['PLO19'], score: 94.50 }
+        ]
+      },
+      {
+        code: '436 232', name: 'โปรแกรมประยุกต์เพื่องานวิชาการ', year: 2, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'ประยุกต์ใช้โปรแกรมประมวลผลคำเพื่อการจัดทำรายงานทางวิชาการได้', plos: ['PLO16'], score: 93.00 },
+          { id: 'CLO2', text: 'ประยุกต์ใช้โปรแกรมเพื่อการนำเสนองานเพื่อนำเสนองานทางวิชาการได้', plos: ['PLO16'], score: 91.40 },
+          { id: 'CLO3', text: 'ประยุกต์ใช้โปรแกรมตารางคำนวณเพื่องานทางวิชาการได้', plos: ['PLO16'], score: 78.60 }
+        ]
+      },
+      {
+        code: '436 233', name: 'โปรแกรมประยุกต์โอเพนซอร์สเพื่องานสารสนเทศ', year: 2, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักโปรแกรมประยุกต์โอเพนซอร์สและมาตรฐานที่เกี่ยวข้อง', plos: ['PLO16'], score: 85.00 },
+          { id: 'CLO2', text: 'เลือกใช้โปรแกรมประยุกต์โอเพนซอร์สได้อย่างเหมาะกับงานสารสนเทศประเภทต่าง ๆ ได้', plos: ['PLO16'], score: 82.80 }
+        ]
+      },
+      {
+        code: '436 301', name: 'เทคโนโลยีเว็บเพื่อการนำเสนอสารสนเทศ', year: 3, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักแนวคิด ทฤษฎีของเทคโนโลยีเว็บ', plos: ['PLO14'], score: 87.50 },
+          { id: 'CLO2', text: 'ออกแบบและพัฒนาเว็บไซต์เพื่อการนำเสนอสารสนเทศได้', plos: ['PLO14'], score: 83.20 },
+          { id: 'CLO3', text: 'เลือกใช้เทคโนโลยีที่เหมาะสมกับการพัฒนาเว็บไซต์ได้', plos: ['PLO16'], score: 81.00 }
+        ]
+      },
+      {
+        code: '436 302', name: 'การทำรายการสารสนเทศ', year: 3, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักการทำรายการภายใต้มาตรฐานที่เกี่ยวข้อง เช่น AACR II ; MARC 21; RDA เป็นต้น', plos: ['PLO13'], score: 82.60 },
+          { id: 'CLO2', text: 'สามารถลงรายการได้ถูกต้องตามมาตรฐานและเหมาะสมกับวัสดุสารสนเทศ', plos: ['PLO13'], score: 73.40 }
+        ]
+      },
+      {
+        code: '436 303', name: 'การวิเคราะห์และออกแบบระบบ', year: 3, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดและเครื่องมือของการวิเคราะห์และออกแบบระบบสารสนเทศ', plos: ['PLO11'], score: 84.10 },
+          { id: 'CLO2', text: 'รู้จักและใช้เครื่องมือเพื่อวิเคราะห์และออกแบบระบบขนาดเล็กได้', plos: ['PLO13'], score: 76.00 },
+          { id: 'CLO3', text: 'สร้างและตีความเอกสารที่เกี่ยวข้องกับการวิเคราะห์และออกแบบระบบ', plos: ['PLO14'], score: 80.50 },
+          { id: 'CLO4', text: 'ใช้เครื่องมือเพื่อวิเคราะห์และออกแบบระบบที่มีขนาดเล็ก', plos: ['PLO16'], score: 78.25 }
+        ]
+      },
+      {
+        code: '436 304', name: 'บริการสารสนเทศและการตลาด', year: 3, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎี กระบวนการในการจัดบริการสารสนเทศได้', plos: ['PLO15'], score: 89.20 },
+          { id: 'CLO2', text: 'ยกตัวอย่างวิธีการศึกษาผู้ใช้ได้', plos: ['PLO15'], score: 86.00 },
+          { id: 'CLO3', text: 'อธิบายแนวคิดด้านกลยุทธ์การตลาดเพื่อส่งเสริมการจัดบริการสารสนเทศได้', plos: ['PLO15'], score: 83.75 },
+          { id: 'CLO4', text: 'ใช้เทคโนโลยีสารสนเทศและการสื่อสารเพื่อให้บริการสารสนเทศได้', plos: ['PLO16'], score: 88.40 },
+          { id: 'CLO5', text: 'อธิบายกรณีการจัดการจัดบริการสารสนเทศที่มีจริยธรรมและถูกกฎหมายได้', plos: ['PLO19'], score: 91.50 }
+        ]
+      },
+      {
+        code: '436 305', name: 'การวิเคราะห์ทรัพยากรสารสนเทศ', year: 3, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดการวิเคราะห์ทรัพยากรสารสนเทศได้', plos: ['PLO13'], score: 86.00 },
+          { id: 'CLO2', text: 'จัดหมวดหมู่หนังสือด้วยระบบทศนิยมของดิวอีได้', plos: ['PLO13'], score: 81.25 },
+          { id: 'CLO3', text: 'จัดหมวดหมู่หนังสือด้วยระบบหอสมุดรัฐสภาอเมริกันได้', plos: ['PLO13'], score: 72.50 },
+          { id: 'CLO4', text: 'กำหนดเลขเรียกหนังสือให้กับทรัพยากรสารสนเทศได้', plos: ['PLO13'], score: 84.80 },
+          { id: 'CLO5', text: 'กำหนดหัวเรื่องให้กับทรัพยากรสารสนเทศได้', plos: ['PLO13'], score: 79.10 }
+        ]
+      },
+      {
+        code: '436 306', name: 'การจัดการเอกสารดิจิทัล', year: 3, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักคุณลักษณะของเอกสารหลากหลายประเภท', plos: ['PLO12', 'PLO18'], score: 88.00 },
+          { id: 'CLO2', text: 'รู้หลักการสร้างและจัดเก็บเอกสารเพื่อคงความน่าเชื่อถือของเอกสารได้', plos: ['PLO13'], score: 83.50 },
+          { id: 'CLO3', text: 'รู้จักเทคโนโลยีที่เกี่ยวข้อง เช่น ระบบจัดการเอกสาร ระบบเครือข่าย', plos: ['PLO16'], score: 85.20 },
+          { id: 'CLO4', text: 'รู้กฎหมายเกี่ยวกับการจัดการเอกสารดิจิทัล', plos: ['PLO19'], score: 81.40 }
+        ]
+      },
+      {
+        code: '436 311', name: 'การจัดโครงสร้างสารสนเทศ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อภิปรายแนวคิด ทฤษฎี ที่เกี่ยวข้องกับการจัดโครงสร้างสารสนเทศได้', plos: ['PLO13'], score: 85.60 },
+          { id: 'CLO2', text: 'เลือกใช้มาตรฐานการจัดหมวดหมู่ได้เหมาะสมกับการจัดการโครงสร้างสารสนเทศ', plos: ['PLO13'], score: 82.00 },
+          { id: 'CLO3', text: 'เลือกใช้เมทาดาทาได้เหมาะสมกับการจัดการโครงสร้างสารสนเทศ', plos: ['PLO13'], score: 76.80 },
+          { id: 'CLO4', text: 'เลือกใช้วิธีจัดโครงสร้างสารสนเทศที่เหมาะสมกับทรัพยากรสารสนเทศได้', plos: ['PLO13'], score: 81.50 }
+        ]
+      },
+      {
+        code: '436 312', name: 'การปรับแต่งสารสนเทศ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด หลักปฏิบัติ เกี่ยวกับการปรับแต่งสารสนเทศ', plos: ['PLO14'], score: 89.00 },
+          { id: 'CLO2', text: 'อธิบายกระบวนการปรับแต่งสารสนเทศได้', plos: ['PLO14'], score: 86.40 },
+          { id: 'CLO3', text: 'ปรับแต่งสารสนเทศให้อยู่ในรูปแบบพร้อมใช้ที่ตรงตามความต้องการของผู้ใช้', plos: ['PLO14'], score: 84.20 },
+          { id: 'CLO4', text: 'ประยุกต์ใช้เทคโนโลยีสารสนเทศในการปรับแต่งสารสนเทศได้', plos: ['PLO16'], score: 88.70 },
+          { id: 'CLO5', text: 'ใช้ความคิดสร้างสรรค์ในการนำเสนอผลงานหรือโครงการและเผยแพร่ผลงานได้', plos: ['PLO17'], score: 91.25 }
+        ]
+      },
+      {
+        code: '436 331', name: 'การเล่าเรื่องเชิงสร้างสรรค์', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดและเทคนิคของการเล่าเรื่องได้', plos: ['PLO14'], score: 92.40 },
+          { id: 'CLO2', text: 'ยกตัวอย่างการวิเคราะห์กลุ่มเป้าหมายของการเล่าเรื่องได้', plos: ['PLO14'], score: 88.50 },
+          { id: 'CLO3', text: 'สาธิตการเล่าเรื่องเพื่อการนำเสนอได้', plos: ['PLO14'], score: 90.00 },
+          { id: 'CLO4', text: 'ประยุกต์ใช้เทคโนโลยีสารสนเทศเพื่อสื่อสารเรื่องราวได้อย่างเหมาะสม', plos: ['PLO16'], score: 87.10 },
+          { id: 'CLO5', text: 'ระบุกรณีการเล่าเรื่องที่อยู่บนพื้นฐานของกฎหมายและจริยธรรมได้', plos: ['PLO19'], score: 93.80 }
+        ]
+      },
+      {
+        code: '436 332', name: 'เครือข่ายทางสังคมและการสื่อสารทางวิชาชีพ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'เข้าใจแนวคิดเครือข่ายทางสังคมและการสื่อสารทางวิชาชีพสารสนเทศ', plos: ['PLO11'], score: 90.20 },
+          { id: 'CLO2', text: 'เข้าใจวิธีการประเมินเครือข่ายทางสังคมและการสื่อสารทางวิชาชีพสารสนเทศ', plos: ['PLO11'], score: 78.40 },
+          { id: 'CLO3', text: 'ประยุกต์เครือข่ายทางสังคมและการสื่อสารทางวิชาชีพในงานสารสนเทศ', plos: ['PLO14'], score: 86.90 },
+          { id: 'CLO4', text: 'รู้จักเทคโนโลยีของเครือข่ายทางสังคมและการสื่อสารทางวิชาชีพ', plos: ['PLO16'], score: 91.60 }
+        ]
+      },
+      {
+        code: '436 333', name: 'การจัดการจดหมายเหตุ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายกระบวนการจัดหาและรวบรวมเอกสารจดหมายเหตุในองค์กรได้', plos: ['PLO12'], score: 85.30 },
+          { id: 'CLO2', text: 'รู้การจัดบริการจดหมายเหตุ รวมถึงการจัดนิทรรศการ การประชาสัมพันธ์และการอนุรักษ์สงวนรักษาเอกสารจดหมายเหตุ', plos: ['PLO15'], score: 87.80 },
+          { id: 'CLO3', text: 'รู้จักและเข้าใจเทคโนโลยีที่เกี่ยวข้องกับงานจดหมายเหตุ', plos: ['PLO16'], score: 81.20 },
+          { id: 'CLO4', text: 'รู้จักกฎหมายและระเบียบที่เกี่ยวเนื่องกับงานจดหมายเหตุ', plos: ['PLO19'], score: 84.00 }
+        ]
+      },
+      {
+        code: '436 334', name: 'การออกแบบสื่อดิจิทัลและสิ่งพิมพ์', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายกระบวนการผลิตสื่อดิจิทัลและสิ่งพิมพ์ได้', plos: ['PLO14'], score: 88.60 },
+          { id: 'CLO2', text: 'เลือกใช้ระบบการผลิต เทคนิคและเทคโนโลยีการผลิตสื่อดิจิทัลและสิ่งพิมพ์ได้', plos: ['PLO14'], score: 84.50 },
+          { id: 'CLO3', text: 'รู้จักธุรกิจการพิมพ์และการเผยแพร่สื่อดิจิทัลและสิ่งพิมพ์', plos: ['PLO14'], score: 81.90 },
+          { id: 'CLO4', text: 'ประยุกต์ใช้โปรแกรมคอมพิวเตอร์ในการผลิตสิ่งพิมพ์ได้', plos: ['PLO16'], score: 89.40 }
+        ]
+      },
+      {
+        code: '436 335', name: 'โปรแกรมประยุกต์เพื่องานธุรกิจ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายกระบวนการทางธุรกิจได้', plos: ['PLO16'], score: 83.40 },
+          { id: 'CLO2', text: 'อธิบายแนวทางการจัดการสารสนเทศเพื่องานธุรกิจได้', plos: ['PLO16'], score: 85.10 },
+          { id: 'CLO3', text: 'ใช้โปรแกรมประยุกต์เพื่อการจัดการสารสนเทศในงานธุรกิจได้', plos: ['PLO16'], score: 87.90 },
+          { id: 'CLO4', text: 'ใช้เทคโนโลยีเพื่อการทำงานร่วมกันได้', plos: ['PLO16'], score: 92.30 },
+          { id: 'CLO5', text: 'อธิบายกรณีการใช้เทคโนโลยีที่มีจริยธรรม และถูกกฎหมายได้', plos: ['PLO19'], score: 90.00 }
+        ]
+      },
+      {
+        code: '436 336', name: 'การถ่ายภาพดิจิทัลและการผลิตวีดิทัศน์', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'ถ่ายภาพนิ่งและภาพเคลื่อนไหวด้วยกล้องดิจิทัลได้', plos: ['PLO14'], score: 91.80 },
+          { id: 'CLO2', text: 'ประยุกต์ใช้โปรแกรมคอมพิวเตอร์ในการปรับแต่งภาพและตัดต่อภาพและเสียงได้', plos: ['PLO16'], score: 88.50 },
+          { id: 'CLO3', text: 'ใช้ความคิดสร้างสรรค์ในการนำเสนอผลงานหรือโครงการและเผยแพร่ผลงานได้', plos: ['PLO17'], score: 93.20 }
+        ]
+      },
+      {
+        code: '436 337', name: 'ภาษาอังกฤษเพื่อนักสารสนเทศ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักคำศัพท์และประโยคที่เหมาะสมกับสถานการณ์และงานบริการ', plos: ['PLO19'], score: 84.50 },
+          { id: 'CLO2', text: 'พูดและเขียนได้ตามวัตถุประสงค์', plos: ['PLO19'], score: 74.20 },
+          { id: 'CLO3', text: 'อ่านจับใจความสำคัญได้', plos: ['PLO19'], score: 81.80 }
+        ]
+      },
+      {
+        code: '436 338', name: 'การนำเสนอด้วยภาพ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้หลักการแนวคิด ทฤษฎี การนำเสนอด้วยภาพ', plos: ['PLO14'], score: 88.00 },
+          { id: 'CLO2', text: 'รู้วิธีการจัดเตรียมข้อมูล ปรับแต่งข้อมูล และเชื่อมโยงข้อมูลเพื่อนำเสนอ', plos: ['PLO14'], score: 83.40 },
+          { id: 'CLO3', text: 'เข้าใจเทคนิคทางสถิติ', plos: ['PLO14'], score: 71.60 },
+          { id: 'CLO4', text: 'ออกแบบและนำเสนอข้อมูลด้วยภาพได้', plos: ['PLO14'], score: 86.75 }
+        ]
+      },
+      {
+        code: '436 339', name: 'ระบบห้องสมุดอัตโนมัติ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายระบบงานห้องสมุดได้', plos: ['PLO11'], score: 87.00 },
+          { id: 'CLO2', text: 'รู้จักและอธิบายการทำงานของระบบห้องสมุดอัตโนมัติ', plos: ['PLO16'], score: 84.60 },
+          { id: 'CLO3', text: 'เลือกใช้โปรแกรมระบบห้องสมุดอัตโนมัติที่เหมาะสมกับระดับห้องสมุด', plos: ['PLO16'], score: 82.10 }
+        ]
+      },
+      {
+        code: '436 340', name: 'การสื่อสารในงานสารสนเทศ', year: 3, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักรูปแบบการเขียนเอกสารในงานสารสนเทศ', plos: ['PLO14'], score: 86.20 },
+          { id: 'CLO2', text: 'รู้จักรูปแบบการพูดเพื่อการสื่อสารในงานสารสนเทศ', plos: ['PLO14'], score: 89.40 }
+        ]
+      },
+      {
+        code: '436 401', name: 'การจัดการฐานข้อมูล', year: 4, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักแนวคิดการจัดการข้อมูลด้วยฐานข้อมูล', plos: ['PLO16'], score: 86.50 },
+          { id: 'CLO2', text: 'รู้จักภาษา SQL โดยเน้นภาษาการจัดการข้อมูล', plos: ['PLO16'], score: 75.40 },
+          { id: 'CLO3', text: 'สร้างฐานข้อมูลเพื่อจัดการสารสนเทศตามวัตถุประสงค์ได้', plos: ['PLO16'], score: 82.80 }
+        ]
+      },
+      {
+        code: '436 402', name: 'สัมมนาการฝึกปฏิบัติงาน', year: 4, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'เข้าใจลักษณะงานขององค์กร/หน่วยงานที่ฝึกปฏิบัติงาน', plos: ['PLO11'], score: 95.20 },
+          { id: 'CLO2', text: 'วิเคราะห์กระบวนการปฏิบัติงานในสถาบันบริการสารสนเทศได้', plos: ['PLO12', 'PLO13', 'PLO15'], score: 91.80 },
+          { id: 'CLO3', text: 'ประยุกต์ใช้เทคโนโลยีสารสนเทศในการนำเสนองานได้', plos: ['PLO14', 'PLO16'], score: 94.00 },
+          { id: 'CLO4', text: 'อภิปรายประเด็นการฝึกปฏิบัติงาน', plos: ['PLO19'], score: 96.10 }
+        ]
+      },
+      {
+        // ★★★ ข้อมูลจริง 100% จากผู้ใช้งาน ★★★
+        code: '436 403', name: 'การค้นคืนสารสนเทศดิจิทัล', year: 4, type: 'mandatory', isReal: true,
+        clos: [
+          { id: 'CLO1', text: 'รู้หลักการเมทาดาทาเพื่อการจัดเก็บและค้นคืนสารสนเทศดิจิทัล', plos: ['PLO13'], score: 92.31 },
+          { id: 'CLO2', text: 'รู้จักโปรโตคอลที่ใช้ในการค้นคืนสารสนเทศ', plos: ['PLO13'], score: 53.85 },
+          { id: 'CLO3', text: 'รู้จักการประเมินผลการค้นคืนสารสนเทศ', plos: ['PLO13'], score: 67.31 },
+          { id: 'CLO4', text: 'ใช้เทคโนโลยีในการจัดเก็บและค้นคืนได้', plos: ['PLO16'], score: 92.31 }
+        ]
+      },
+      {
+        code: '436 404', name: 'การจัดการความรู้', year: 4, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎี กระบวนการจัดการความรู้สำหรับองค์กรได้', plos: ['PLO11'], score: 89.40 },
+          { id: 'CLO2', text: 'อธิบายการใช้เทคโนโลยีสารสนเทศและการสื่อสารเพื่อการจัดการความรู้ได้', plos: ['PLO16'], score: 86.20 },
+          { id: 'CLO3', text: 'ระบุกรณีการจัดการความรู้อย่างมีจริยธรรม และถูกกฎหมายได้', plos: ['PLO19'], score: 91.70 }
+        ]
+      },
+      {
+        code: '436 405', name: 'ห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน', year: 4, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิดของห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน', plos: ['PLO11'], score: 90.10 },
+          { id: 'CLO2', text: 'อธิบายการจัดระบบ การจัดการและการประเมินผล ตลอดจนเครื่องมือที่เกี่ยวข้องกับการออกแบบห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน', plos: ['PLO13'], score: 83.40 },
+          { id: 'CLO3', text: 'ออกแบบเพื่อพัฒนาห้องสมุดดิจิทัลและคลังสารสนเทศสถาบันขนาดเล็ก', plos: ['PLO14'], score: 81.90 },
+          { id: 'CLO4', text: 'รู้จักและเลือกใช้โปรแกรมจัดการระบบห้องสมุดดิจิทัลและคลังสารสนเทศสถาบัน เช่น Omeka, Greenstone, Dspace เป็นต้น', plos: ['PLO16'], score: 87.50 }
+        ]
+      },
+      {
+        code: '436 406', name: 'การวิจัยพื้นฐานทางสารสนเทศศาสตร์', year: 4, type: 'mandatory', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความหมาย ความสำคัญ ประเภทงานวิจัย และรวบรวมสารสนเทศเพื่อการวิจัยทางสารสนเทศศาสตร์ได้', plos: ['PLO12'], score: 85.80 },
+          { id: 'CLO2', text: 'เขียนโครงร่างการวิจัยได้', plos: ['PLO14'], score: 76.90 },
+          { id: 'CLO3', text: 'อธิบายจริยธรรมการวิจัยได้', plos: ['PLO19'], score: 93.20 }
+        ]
+      },
+      {
+        code: '436 411', name: 'การจัดการสารสนเทศธุรกิจ', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎีที่เกี่ยวข้องกับการจัดการสารสนเทศทางธุรกิจได้', plos: ['PLO11'], score: 86.00 },
+          { id: 'CLO2', text: 'เลือกใช้เทคโนโลยีสารสนเทศและการสื่อสารเพื่อการจัดการได้', plos: ['PLO16'], score: 88.20 },
+          { id: 'CLO4', text: 'ระบุการใช้สารสนเทศทางธุรกิจอย่างมีจริยธรรมและถูกกฎหมายได้ (หมายเหตุ: ในเอกสารต้นฉบับไม่ปรากฏ CLO3)', plos: ['PLO19'], score: 90.50 }
+        ]
+      },
+      {
+        code: '436 431', name: 'สารสนเทศทางวัฒนธรรม', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายความต้องการของผู้ใช้สารสนเทศทางวัฒนธรรมได้', plos: ['PLO15'], score: 88.90 },
+          { id: 'CLO2', text: 'รู้จักและเข้าใจแนวคิด ลักษณะ และประเภทของสารสนเทศทางวัฒนธรรม', plos: ['PLO18'], score: 91.00 },
+          { id: 'CLO3', text: 'รู้จักและอธิบายการดำเนินงานแหล่งสารสนเทศทางวัฒนธรรม', plos: ['PLO18'], score: 85.40 },
+          { id: 'CLO4', text: 'รู้วิธีการอนุรักษ์และบำรุงรักษาสารสนเทศทางวัฒนธรรม', plos: ['PLO18'], score: 78.50 }
+        ]
+      },
+      {
+        code: '436 433', name: 'การบริหารโครงการ', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'อธิบายแนวคิด ทฤษฎี วงจรชีวิตของโครงการประเภทต่างๆ ได้', plos: ['PLO11'], score: 87.30 }
+        ]
+      },
+      {
+        code: '436 434', name: 'ศิลปะในสถาบันบริการสารสนเทศ', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักหลักการ แนวคิดเบื้องต้นทางศิลปะ', plos: ['PLO17'], score: 90.40 },
+          { id: 'CLO2', text: 'รู้กระบวนการสร้างสรรค์งานศิลปะ และวิธีการจัดเก็บและบันทึกเรื่องราวระหว่างการสร้างสรรค์งาน', plos: ['PLO17'], score: 86.80 },
+          { id: 'CLO3', text: 'อธิบายความสำคัญของศิลปะที่มีต่อสถาบันบริการสารสนเทศ', plos: ['PLO17'], score: 92.00 },
+          { id: 'CLO4', text: 'ประยุกต์ใช้ศิลปะและความคิดสร้างสรรค์ในการจัดและตกแต่งสถาบันบริการสารสนเทศได้', plos: ['PLO17'], score: 89.50 }
+        ]
+      },
+      {
+        code: '436 435', name: 'การศึกษาเอกเทศ', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักการทบทวนวรรณกรรม', plos: ['PLO14'], score: 84.20 },
+          { id: 'CLO2', text: 'เลือกรูปแบบการนำเสนองานที่เหมาะสมกับประเด็นที่ศึกษาได้', plos: ['PLO14'], score: 88.60 }
+        ]
+      },
+      {
+        code: '436 436', name: 'การออกแบบและผลิตสื่อมัลติมีเดีย', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'ระบุความต้องการสารสนเทศของผู้ใช้ / กลุ่มเป้าหมายได้', plos: ['PLO14'], score: 89.10 },
+          { id: 'CLO2', text: 'ออกแบบสารสนเทศที่สอดคล้องกับความต้องการของผู้ใช้ได้', plos: ['PLO14'], score: 85.75 },
+          { id: 'CLO3', text: 'ออกแบบและผลิตสื่อ โดยใช้เทคโนโลยีในการผลิตสื่อได้', plos: ['PLO17'], score: 87.40 },
+          { id: 'CLO4', text: 'รู้วิธีการประเมินสื่อในด้านเนื้อหาและความสวยงาม', plos: ['PLO17'], score: 83.00 }
+        ]
+      },
+      {
+        code: '436 437', name: 'การเขียนโปรแกรมเว็บ', year: 4, type: 'elective', isReal: false,
+        clos: [
+          { id: 'CLO1', text: 'รู้จักโครงสร้างภาษาเขียนโปรแกรม', plos: ['PLO16'], score: 81.50 },
+          { id: 'CLO2', text: 'รู้จักวิธีการเชื่อมต่อฐานข้อมูลเพื่อนำข้อมูลมาใช้ในเว็บ', plos: ['PLO16'], score: 69.80 },
+          { id: 'CLO3', text: 'สร้างโปรแกรมประยุกต์เว็บเพื่อจัดการข้อมูลได้', plos: ['PLO16'], score: 75.20 }
+        ]
+      }
+    ];
+
+    // สำเนาข้อมูลที่ใช้งานจริง (รองรับการแก้ไขใน Simulation Mode)
+    let coursesData = cloneCourses(INITIAL_COURSES);
+    let modifiedKeys = new Set(); // เก็บ key เช่น "436 403::CLO2"
+
+    function cloneCourses(src) {
+      return src.map(c => ({
+        ...c,
+        clos: c.clos.map(clo => ({ ...clo, plos: [...clo.plos] }))
+      }));
+    }
+
+    /**
+     * ============================================================================
+     * 2. สถานะของแอปพลิเคชัน (State) และ Chart Instances
+     * ============================================================================
+     */
+    const state = {
+      courseType: 'mandatory', // 'all' | 'mandatory' | 'elective' (ค่าเริ่มต้น: วิชาบังคับ)
+      selectedYears: [],       // [] = ทุกชั้นปี
+      selectedPLOs: [],        // [] = ทุก PLO
+      statusFilter: 'all',     // 'all' | 'pass' | 'fail'
+      searchQuery: '',
+      activeTab: 'overview',   // 'overview' | 'matrix' | 'courses' | 'cqi'
+      simMode: false
+    };
+
+    let ploChartInstance = null;
+    let yloChartInstance = null;
+    let modalJumpContext = null;
+
+    /**
+     * ============================================================================
+     * 3. ฟังก์ชันช่วยคำนวณ (Helper & Business Logic)
+     * ============================================================================
+     */
+    function isPass(score) {
+      return Number(score) >= PASS_THRESHOLD;
+    }
+
+    function fmtPct(num) {
+      return Number(num).toFixed(2) + '%';
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function highlightText(text, query) {
+      const safe = escapeHtml(text);
+      if (!query) return safe;
+      const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return safe.replace(new RegExp(`(${escapedQ})`, 'gi'), '<mark class="bg-amber-200/80 text-slate-900 rounded px-0.5">$1</mark>');
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastText').textContent = msg;
+      box.classList.remove('hidden');
+      box.classList.add('flex');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        box.classList.add('hidden');
+        box.classList.remove('flex');
+      }, 2800);
+    }
+
+    /**
+     * คัดกรองรายวิชาและ CLOs ตามตัวกรองปัจจุบัน
+     * @param {Object} options - { ignoreStatus: boolean, ignoreYear: boolean, ignorePLO: boolean }
+     */
+    function getFilteredCourses(options = {}) {
+      const q = state.searchQuery.trim().toLowerCase();
+
+      return coursesData.reduce((acc, course) => {
+        if (state.courseType !== 'all' && course.type !== state.courseType) return acc;
+        if (!options.ignoreYear && state.selectedYears.length > 0 && !state.selectedYears.includes(course.year)) return acc;
+
+        const courseMatchesSearch = !q ||
+          course.code.toLowerCase().includes(q) ||
+          course.name.toLowerCase().includes(q);
+
+        const matchedCLOs = course.clos.filter(clo => {
+          if (!options.ignorePLO && state.selectedPLOs.length > 0) {
+            if (!clo.plos.some(p => state.selectedPLOs.includes(p))) return false;
+          }
+          if (!options.ignoreStatus && state.statusFilter !== 'all') {
+            const passed = isPass(clo.score);
+            if (state.statusFilter === 'pass' && !passed) return false;
+            if (state.statusFilter === 'fail' && passed) return false;
+          }
+          if (!q) return true;
+          return courseMatchesSearch ||
+            clo.id.toLowerCase().includes(q) ||
+            clo.text.toLowerCase().includes(q);
+        });
+
+        if (matchedCLOs.length > 0) {
+          acc.push({ ...course, matchedCLOs });
+        }
+        return acc;
+      }, []);
+    }
+
+    /**
+     * คำนวณสถิติ PLO สำหรับชุดรายวิชาที่กำหนด
+     * นับรวมทุกความเชื่อมโยงกรณี 1 CLO เชื่อมหลาย PLO
+     */
+    function computePLOStats(filteredCourses) {
+      const stats = {};
+      PLOS.forEach(p => {
+        stats[p.id] = { id: p.id, short: p.short, desc: p.desc, pass: 0, fail: 0, total: 0, pct: null };
+      });
+
+      filteredCourses.forEach(c => {
+        c.matchedCLOs.forEach(clo => {
+          const passed = isPass(clo.score);
+          clo.plos.forEach(pId => {
+            if (state.selectedPLOs.length > 0 && !state.selectedPLOs.includes(pId)) return;
+            if (!stats[pId]) return;
+            stats[pId].total += 1;
+            if (passed) stats[pId].pass += 1;
+            else stats[pId].fail += 1;
+          });
+        });
+      });
+
+      Object.values(stats).forEach(s => {
+        s.pct = s.total > 0 ? (s.pass / s.total) * 100 : null;
+      });
+      return stats;
+    }
+
+    /**
+     * คำนวณสถิติ YLO แยกตามชั้นปี (ปี 1 - 4) พร้อมแจกแจงราย PLO ภายในชั้นปีนั้น
+     */
+    function computeYLOStats(filteredCourses) {
+      const years = [1, 2, 3, 4].map(yr => {
+        const yrCourses = filteredCourses.filter(c => c.year === yr);
+        let passCLOs = 0;
+        let totalCLOs = 0;
+        const ploMap = {};
+
+        yrCourses.forEach(c => {
+          c.matchedCLOs.forEach(clo => {
+            const passed = isPass(clo.score);
+            totalCLOs += 1;
+            if (passed) passCLOs += 1;
+
+            clo.plos.forEach(pId => {
+              if (state.selectedPLOs.length > 0 && !state.selectedPLOs.includes(pId)) return;
+              if (!ploMap[pId]) ploMap[pId] = { id: pId, pass: 0, total: 0 };
+              ploMap[pId].total += 1;
+              if (passed) ploMap[pId].pass += 1;
+            });
+          });
+        });
+
+        const ploList = Object.values(ploMap)
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .map(p => ({ ...p, pct: (p.pass / p.total) * 100 }));
+
+        return {
+          year: yr,
+          courseCount: yrCourses.length,
+          passCLOs,
+          failCLOs: totalCLOs - passCLOs,
+          totalCLOs,
+          pct: totalCLOs > 0 ? (passCLOs / totalCLOs) * 100 : null,
+          plos: ploList
+        };
+      });
+      return years;
+    }
+
+    /**
+     * ============================================================================
+     * 4. การอัปเดต UI ของแถบคัดกรองและ Simulation Mode
+     * ============================================================================
+     */
+    function initPLOChips() {
+      const container = document.getElementById('ploChipGroup');
+      let html = `<button type="button" data-plo="all" class="plo-chip px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">ทั้งหมด</button>`;
+      PLOS.forEach(p => {
+        html += `<button type="button" data-plo="${p.id}" title="${escapeHtml(p.desc)}" class="plo-chip px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer">${p.id}</button>`;
+      });
+      container.innerHTML = html;
+
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.plo-chip');
+        if (!btn) return;
+        const val = btn.dataset.plo;
+        if (val === 'all') {
+          state.selectedPLOs = [];
+        } else {
+          const idx = state.selectedPLOs.indexOf(val);
+          if (idx > -1) state.selectedPLOs.splice(idx, 1);
+          else state.selectedPLOs.push(val);
+          if (state.selectedPLOs.length === PLOS.length) state.selectedPLOs = [];
+        }
+        renderAll();
+      });
+    }
+
+    function updateFilterControlsUI() {
+      // ประเภทวิชา
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        const active = btn.dataset.type === state.courseType;
+        btn.className = `type-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer ${
+          active ? 'bg-navy text-white border-navy shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+        }`;
+      });
+
+      // ชั้นปี
+      document.querySelectorAll('.year-btn').forEach(btn => {
+        const val = btn.dataset.year;
+        const active = val === 'all' ? state.selectedYears.length === 0 : state.selectedYears.includes(Number(val));
+        btn.className = `year-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer ${
+          active ? 'bg-slatebrand text-white border-slatebrand shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+        }`;
+      });
+
+      // สถานะเกณฑ์
+      document.querySelectorAll('.status-btn').forEach(btn => {
+        const val = btn.dataset.status;
+        const active = val === state.statusFilter;
+        let activeCls = 'bg-navy text-white border-navy shadow-sm';
+        if (val === 'pass') activeCls = 'bg-emerald-600 text-white border-emerald-600 shadow-sm';
+        if (val === 'fail') activeCls = 'bg-red-600 text-white border-red-600 shadow-sm';
+        btn.className = `status-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer ${
+          active ? activeCls : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+        }`;
+      });
+
+      // ชิป PLO
+      document.querySelectorAll('.plo-chip').forEach(btn => {
+        const val = btn.dataset.plo;
+        const active = val === 'all' ? state.selectedPLOs.length === 0 : state.selectedPLOs.includes(val);
+        btn.className = `plo-chip px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium border transition cursor-pointer ${
+          active ? 'bg-navy text-white border-navy shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slatebrand/50 hover:bg-slatebrand-light/40'
+        }`;
+      });
+
+      document.getElementById('ploSelectedHint').textContent = state.selectedPLOs.length === 0
+        ? 'แสดงทั้งหมด (PLO11 – PLO19)'
+        : `เลือกแล้ว ${state.selectedPLOs.length} รายการ: ${state.selectedPLOs.join(', ')}`;
+
+      document.getElementById('btnClearSearch').classList.toggle('hidden', !state.searchQuery);
+
+      // แท็บนำทาง
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const active = btn.dataset.tab === state.activeTab;
+        btn.className = `tab-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium transition cursor-pointer ${
+          active ? 'bg-navy text-white shadow-sm' : 'text-slate-600 hover:text-navy hover:bg-slate-100'
+        }`;
+      });
+
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== `tab-${state.activeTab}`);
+      });
+
+      // Simulation Mode UI
+      const btnSim = document.getElementById('btnToggleSim');
+      const simDot = document.getElementById('simDot');
+      const simLabel = document.getElementById('simLabel');
+      const simBanner = document.getElementById('simBanner');
+      const btnResetScores = document.getElementById('btnResetScores');
+
+      if (state.simMode) {
+        btnSim.className = 'inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer border border-amber-300 bg-amber-400/20 text-amber-200';
+        simDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        simLabel.textContent = 'โหมดทดลองปรับคะแนน: เปิด';
+        simBanner.classList.remove('hidden');
+      } else {
+        btnSim.className = 'inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium transition cursor-pointer border border-white/20 bg-white/10 hover:bg-white/20 text-white';
+        simDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300';
+        simLabel.textContent = 'โหมดทดลองปรับคะแนน: ปิด';
+        simBanner.classList.add('hidden');
+      }
+
+      document.getElementById('simModifiedCount').textContent = `ปรับแก้ไขแล้ว ${modifiedKeys.size} รายการ`;
+      btnResetScores.classList.toggle('hidden', modifiedKeys.size === 0);
+
+      // สรุปเงื่อนไขหน้าพิมพ์
+      const typeLabel = state.courseType === 'all' ? 'ทั้งหมด (40 วิชา)' : state.courseType === 'mandatory' ? 'เฉพาะวิชาบังคับ (17 วิชา)' : 'เฉพาะวิชาเลือก (23 วิชา)';
+      const yearLabel = state.selectedYears.length === 0 ? 'ทุกชั้นปี (ปี 1–4)' : state.selectedYears.slice().sort().map(y => `ปี ${y}`).join(', ');
+      const ploLabel = state.selectedPLOs.length === 0 ? 'ทั้งหมด (PLO11–PLO19)' : state.selectedPLOs.join(', ');
+      const statusLabel = state.statusFilter === 'all' ? 'ทั้งหมด' : state.statusFilter === 'pass' ? 'ผ่านเกณฑ์ (≥80%)' : 'ต่ำกว่าเกณฑ์ (<80%)';
+      document.getElementById('printFilterSummary').innerHTML = `
+        <strong>ขอบเขตรายงาน:</strong> ประเภทวิชา: ${typeLabel} | ชั้นปี: ${yearLabel} | PLO: ${ploLabel} | สถานะ: ${statusLabel}
+        ${state.searchQuery ? ` | คำค้นหา: "${escapeHtml(state.searchQuery)}"` : ''}
+        ${modifiedKeys.size > 0 ? ` | <span class="text-amber-700 font-semibold">(มีการจำลองปรับคะแนน ${modifiedKeys.size} รายการ)</span>` : ''}
+      `;
+    }
+
+    /**
+     * ============================================================================
+     * 5. แท็บ 1: ภาพรวม & YLO รายชั้นปี (KPI + Spotlight + YLO Cards + Charts)
+     * ============================================================================
+     */
+    function renderOverviewTab(filteredCourses) {
+      // 1) KPI 4 การ์ด
+      const totalCourses = filteredCourses.length;
+      const mandCount = filteredCourses.filter(c => c.type === 'mandatory').length;
+      const elecCount = filteredCourses.filter(c => c.type === 'elective').length;
+
+      let totalCLOs = 0;
+      let passCLOs = 0;
+      filteredCourses.forEach(c => {
+        c.matchedCLOs.forEach(clo => {
+          totalCLOs += 1;
+          if (isPass(clo.score)) passCLOs += 1;
+        });
+      });
+      const failCLOs = totalCLOs - passCLOs;
+      const passRate = totalCLOs > 0 ? (passCLOs / totalCLOs) * 100 : 0;
+      const failRate = totalCLOs > 0 ? (failCLOs / totalCLOs) * 100 : 0;
+
+      const ploStats = computePLOStats(filteredCourses);
+      const activePLOs = Object.values(ploStats).filter(p => p.total > 0);
+      const avgPLO = activePLOs.length > 0
+        ? activePLOs.reduce((sum, p) => sum + p.pct, 0) / activePLOs.length
+        : 0;
+      const plosPassing80 = activePLOs.filter(p => p.pct >= PASS_THRESHOLD).length;
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <!-- KPI 1 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-heading font-medium text-slate-500">รายวิชาที่แสดง</p>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-3xl font-heading font-bold text-navy">${totalCourses}</span>
+              <span class="text-sm text-slate-500">รายวิชา</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1.5">บังคับ ${mandCount} • เลือก ${elecCount}</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-navy/10 text-navy flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-emerald-200/80 p-5 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-heading font-medium text-emerald-700">CLO ผ่านเกณฑ์ (≥80%)</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-3xl font-heading font-bold text-emerald-600">${passCLOs}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-pass-bg text-emerald-700">${fmtPct(passRate)}</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1.5">จากทั้งหมด ${totalCLOs} CLOs</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-pass-bg text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-red-200/80 p-5 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-heading font-medium text-red-700">CLO ต้องปรับปรุง (&lt;80%)</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-3xl font-heading font-bold text-red-600">${failCLOs}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-fail-bg text-red-700">${fmtPct(failRate)}</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1.5">รายการที่ต้องวางแผน CQI</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-fail-bg text-red-600 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-heading font-medium text-slatebrand">อัตราการบรรลุ PLO เฉลี่ย</p>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-3xl font-heading font-bold text-slatebrand">${fmtPct(avgPLO)}</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1.5">PLO ที่ผ่าน ≥80%: ${plosPassing80} / ${activePLOs.length} PLO</p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-slatebrand-light text-slatebrand flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+        </div>
+      `;
+
+      // 2) การ์ด Spotlight พิเศษ: 436 403 ข้อมูลจริง
+      const realCourse = coursesData.find(c => c.code === '436 403');
+      const realPassCount = realCourse.clos.filter(clo => isPass(clo.score)).length;
+      const realPassPct = (realPassCount / realCourse.clos.length) * 100;
+
+      document.getElementById('spotlightCard').innerHTML = `
+        <div class="rounded-2xl bg-gradient-to-br from-navy via-navy to-slatebrand text-white shadow-md overflow-hidden border border-navy">
+          <div class="p-5 sm:p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-white/15">
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-400 text-navy-dark shadow-xs">
+                    ★ ข้อมูลจริง (Real Assessment Data)
+                  </span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/15 text-blue-100">
+                    ชั้นปีที่ 4 • วิชาบังคับ
+                  </span>
+                </div>
+                <h2 class="text-lg sm:text-xl font-heading font-semibold">
+                  ตัวอย่างข้อมูลจริง: 436 403 การค้นคืนสารสนเทศดิจิทัล
+                </h2>
+                <p class="text-xs sm:text-sm text-blue-100/90 mt-0.5">
+                  ผลสัมฤทธิ์ผู้เรียนระดับ Rubric 2–3: ผ่านเกณฑ์ <strong>${realPassCount}/${realCourse.clos.length} CLO (${fmtPct(realPassPct)})</strong> — จุดที่ต้องปรับปรุงเร่งด่วนอยู่ที่ <strong>PLO13 (CLO2 และ CLO3)</strong>
+                </p>
+              </div>
+              <button
+                type="button"
+                onclick="jumpToCourseDetail('436 403')"
+                class="no-print inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-navy hover:bg-blue-50 text-sm font-semibold shadow-sm transition cursor-pointer shrink-0 self-start lg:self-center"
+              >
+                <span>ดูรายละเอียดรายวิชา</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+              ${realCourse.clos.map(clo => {
+                const passed = isPass(clo.score);
+                return `
+                  <div class="rounded-xl p-3.5 bg-white/10 border ${passed ? 'border-emerald-300/40' : 'border-red-300/50'} backdrop-blur-xs flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="font-heading font-semibold text-sm">${clo.id} <span class="text-xs font-normal text-blue-200">(${clo.plos.join(', ')})</span></span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${passed ? 'bg-emerald-400/25 text-emerald-100' : 'bg-red-500/35 text-red-100'}">
+                          ${passed ? 'ผ่านเกณฑ์' : 'ต่ำกว่าเกณฑ์'}
+                        </span>
+                      </div>
+                      <p class="text-xs text-blue-100/90 line-clamp-2 leading-relaxed">${escapeHtml(clo.text)}</p>
+                    </div>
+                    <div class="mt-3">
+                      <div class="flex items-baseline justify-between mb-1">
+                        <span class="text-[11px] text-blue-200">Rubric 2–3</span>
+                        <span class="font-heading font-bold text-lg ${passed ? 'text-emerald-300' : 'text-red-300'}">${fmtPct(clo.score)}</span>
+                      </div>
+                      <div class="relative w-full h-2 rounded-full bg-white/15 overflow-hidden">
+                        <div class="h-full rounded-full ${passed ? 'bg-emerald-400' : 'bg-red-400'}" style="width: ${Math.min(100, clo.score)}%"></div>
+                        <div class="absolute top-0 bottom-0 w-0.5 bg-amber-300" style="left: 80%" title="เกณฑ์ 80%"></div>
+                      </div>
+                      ${state.simMode ? `
+                        <div class="mt-2 pt-2 border-t border-white/15 flex items-center gap-2 no-print">
+                          <input type="range" min="0" max="100" step="0.01" value="${clo.score}"
+                            oninput="handleScoreChange('436 403', '${clo.id}', this.value)"
+                            class="sim-slider flex-1" />
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // 3) การ์ดสรุป YLO 4 ชั้นปี (ปี 1 – ปี 4)
+      const yloStats = computeYLOStats(filteredCourses);
+      document.getElementById('yloGrid').innerHTML = yloStats.map(y => {
+        const isYearSelected = state.selectedYears.includes(y.year);
+        const hasData = y.totalCLOs > 0;
+        const pctColor = !hasData ? 'text-slate-400' : y.pct >= 80 ? 'text-emerald-600' : y.pct >= 60 ? 'text-amber-600' : 'text-red-600';
+        const badgeBg = !hasData ? 'bg-slate-100 text-slate-500' : y.pct >= 80 ? 'bg-pass-bg text-emerald-700' : y.pct >= 60 ? 'bg-amber-50 text-amber-700' : 'bg-fail-bg text-red-700';
+
+        return `
+          <div
+            onclick="toggleYearFromCard(${y.year})"
+            class="bg-white rounded-2xl shadow-sm border-2 ${isYearSelected ? 'border-slatebrand ring-2 ring-slatebrand/15' : 'border-slate-200/80 hover:border-slatebrand/50'} p-4 sm:p-5 transition cursor-pointer flex flex-col justify-between print-break-inside-avoid"
+            title="คลิกเพื่อคัดกรองดูเฉพาะชั้นปีที่ ${y.year}"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                <div>
+                  <span class="text-xs font-heading font-semibold uppercase tracking-wider text-slate-400">YLO ${y.year}</span>
+                  <h3 class="font-heading font-semibold text-navy text-base">ชั้นปีที่ ${y.year}</h3>
+                </div>
+                <div class="text-right">
+                  <div class="font-heading font-bold text-xl ${pctColor}">${hasData ? fmtPct(y.pct) : '–'}</div>
+                  <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium ${badgeBg}">
+                    ${hasData ? `ผ่าน ${y.passCLOs}/${y.totalCLOs} CLO` : 'ไม่มีรายวิชา'}
+                  </span>
+                </div>
+              </div>
+
+              <!-- รายการ PLO Progress Bar ย่อยในชั้นปี -->
+              <div class="mt-3 space-y-2">
+                ${y.plos.length > 0 ? y.plos.map(p => {
+                  const barColor = p.pct >= 80 ? 'bg-emerald-500' : p.pct >= 60 ? 'bg-amber-500' : 'bg-red-500';
+                  return `
+                    <div>
+                      <div class="flex items-center justify-between text-xs mb-0.5">
+                        <span class="font-heading font-medium text-slate-700">${p.id}</span>
+                        <span class="text-slate-500">${p.pass}/${p.total} (${p.pct.toFixed(0)}%)</span>
+                      </div>
+                      <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div class="h-full rounded-full ${barColor}" style="width: ${p.pct}%"></div>
+                      </div>
+                    </div>
+                  `;
+                }).join('') : `
+                  <p class="text-xs text-slate-400 italic py-4 text-center">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p>
+                `}
+              </div>
+            </div>
+
+            <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>${y.courseCount} รายวิชา</span>
+              <span class="text-slatebrand font-medium no-print">${isYearSelected ? 'กำลังกรองปีนี้ ✓' : 'คลิกเพื่อกรอง →'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 4) วาดกราฟ Chart.js
+      renderCharts(ploStats, yloStats);
+    }
+
+    /**
+     * วาดกราฟ Chart.js ทั้ง 2 กราฟ พร้อม Custom Plugin วาดเส้นประเกณฑ์ 80%
+     */
+    const thresholdLinePlugin = {
+      id: 'thresholdLine80',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!scales.x) return;
+        const xPos = scales.x.getPixelForValue(80);
+        if (xPos < chartArea.left || xPos > chartArea.right) return;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([6, 4]);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#D97706';
+        ctx.moveTo(xPos, chartArea.top);
+        ctx.lineTo(xPos, chartArea.bottom);
+        ctx.stroke();
+
+        ctx.fillStyle = '#B45309';
+        ctx.font = '600 11px Prompt, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('เกณฑ์ 80%', xPos, chartArea.top - 6);
+        ctx.restore();
+      }
+    };
+
+    function renderCharts(ploStats, yloStats) {
+      // 1) กราฟ PLO แนวนอน
+      const ploList = PLOS.map(p => ploStats[p.id]);
+      const ploLabels = ploList.map(p => p.id);
+      const ploValues = ploList.map(p => p.pct !== null ? Number(p.pct.toFixed(2)) : 0);
+      const ploColors = ploList.map(p => {
+        if (p.pct === null) return '#CBD5E1';
+        if (p.pct >= 80) return '#10B981';
+        if (p.pct >= 60) return '#F59E0B';
+        return '#EF4444';
+      });
+
+      const ploCtx = document.getElementById('ploChartCanvas').getContext('2d');
+      if (ploChartInstance) ploChartInstance.destroy();
+      ploChartInstance = new Chart(ploCtx, {
+        type: 'bar',
+        data: {
+          labels: ploLabels,
+          datasets: [{
+            label: 'อัตราการบรรลุ CLO (%)',
+            data: ploValues,
+            backgroundColor: ploColors,
+            borderRadius: 6,
+            barThickness: 20
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: { padding: { top: 18, right: 16 } },
+          scales: {
+            x: {
+              min: 0,
+              max: 100,
+              ticks: {
+                callback: v => v + '%',
+                font: { family: 'Sarabun', size: 12 }
+              },
+              grid: { color: '#F1F5F9' }
+            },
+            y: {
+              ticks: { font: { family: 'Prompt', size: 12, weight: '500' }, color: '#1B365D' },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: items => {
+                  const idx = items[0].dataIndex;
+                  return `${ploList[idx].id}: ${ploList[idx].short}`;
+                },
+                label: item => {
+                  const s = ploList[item.dataIndex];
+                  if (s.total === 0) return 'ไม่มีรายวิชาตามเงื่อนไขที่เลือก';
+                  return `ผ่านเกณฑ์ ${s.pass} / ${s.total} CLO (${s.pct.toFixed(2)}%)`;
+                }
+              }
+            }
+          }
+        },
+        plugins: [thresholdLinePlugin]
+      });
+
+      // 2) กราฟแท่ง YLO รายชั้นปี
+      const yloCtx = document.getElementById('yloChartCanvas').getContext('2d');
+      if (yloChartInstance) yloChartInstance.destroy();
+      yloChartInstance = new Chart(yloCtx, {
+        type: 'bar',
+        data: {
+          labels: yloStats.map(y => `ชั้นปีที่ ${y.year}`),
+          datasets: [
+            {
+              label: 'ผ่านเกณฑ์ (≥80%)',
+              data: yloStats.map(y => y.passCLOs),
+              backgroundColor: '#10B981',
+              borderRadius: 6
+            },
+            {
+              label: 'ต่ำกว่าเกณฑ์ (<80%)',
+              data: yloStats.map(y => y.failCLOs),
+              backgroundColor: '#EF4444',
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              ticks: { font: { family: 'Prompt', size: 12, weight: '500' }, color: '#1B365D' },
+              grid: { display: false }
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              ticks: { stepSize: 5, font: { family: 'Sarabun', size: 12 } },
+              grid: { color: '#F1F5F9' },
+              title: { display: true, text: 'จำนวน CLO', font: { family: 'Prompt', size: 12 } }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { family: 'Sarabun', size: 13 }, usePointStyle: true, padding: 16 }
+            },
+            tooltip: {
+              callbacks: {
+                afterBody: items => {
+                  const y = yloStats[items[0].dataIndex];
+                  return y.totalCLOs > 0
+                    ? `รวม ${y.totalCLOs} CLO • อัตราผ่าน ${y.pct.toFixed(2)}%`
+                    : 'ไม่มีข้อมูล';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /**
+     * ============================================================================
+     * 6. แท็บ 2: เมทริกซ์ PLO × ชั้นปี (Heatmap Table + Modal Drill-down)
+     * ============================================================================
+     */
+    function getHeatmapCellStyle(pct) {
+      if (pct >= 80) return 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200';
+      if (pct >= 60) return 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200';
+      return 'bg-red-50 hover:bg-red-100 text-red-900 border-red-200';
+    }
+
+    function renderMatrixTab(filteredCourses) {
+      const targetPLOs = state.selectedPLOs.length > 0
+        ? PLOS.filter(p => state.selectedPLOs.includes(p.id))
+        : PLOS;
+
+      let rowsHtml = '';
+      targetPLOs.forEach(plo => {
+        let rowPass = 0;
+        let rowTotal = 0;
+        let cellsHtml = '';
+
+        [1, 2, 3, 4].forEach(yr => {
+          let cellPass = 0;
+          let cellTotal = 0;
+          let hasReal = false;
+
+          filteredCourses.filter(c => c.year === yr).forEach(c => {
+            c.matchedCLOs.forEach(clo => {
+              if (clo.plos.includes(plo.id)) {
+                cellTotal += 1;
+                if (isPass(clo.score)) cellPass += 1;
+                if (c.isReal) hasReal = true;
+              }
+            });
+          });
+
+          rowPass += cellPass;
+          rowTotal += cellTotal;
+
+          if (cellTotal > 0) {
+            const pct = (cellPass / cellTotal) * 100;
+            const cellStyle = getHeatmapCellStyle(pct);
+            cellsHtml += `
+              <td class="p-2 border-b border-slate-100 text-center">
+                <button
+                  type="button"
+                  onclick="openDrillModal('${plo.id}', ${yr})"
+                  class="w-full py-2.5 px-2 rounded-xl border transition cursor-pointer ${cellStyle} relative"
+                  title="คลิกเพื่อดูรายละเอียดรายวิชาและ CLO ของ ${plo.id} ชั้นปีที่ ${yr}"
+                >
+                  ${hasReal ? '<span class="absolute top-1 right-1.5 text-[10px] text-amber-600 font-bold" title="มีข้อมูลจริง (436 403)">★</span>' : ''}
+                  <div class="font-heading font-bold text-sm">${pct.toFixed(1)}%</div>
+                  <div class="text-xs opacity-80 mt-0.5">${cellPass}/${cellTotal} CLO</div>
+                </button>
+              </td>
+            `;
+          } else {
+            cellsHtml += `
+              <td class="p-2 border-b border-slate-100 text-center">
+                <div class="py-3 rounded-xl bg-slate-50 text-slate-300 text-sm">–</div>
+              </td>
+            `;
+          }
+        });
+
+        const rowPct = rowTotal > 0 ? (rowPass / rowTotal) * 100 : null;
+        const totalBadge = rowPct === null
+          ? '<span class="text-slate-300">–</span>'
+          : `<button type="button" onclick="openDrillModal('${plo.id}', 'all')" class="w-full py-2 px-2 rounded-xl border font-heading transition cursor-pointer ${getHeatmapCellStyle(rowPct)}">
+              <div class="font-bold text-sm">${rowPct.toFixed(1)}%</div>
+              <div class="text-xs font-sans opacity-80">${rowPass}/${rowTotal} CLO</div>
+            </button>`;
+
+        rowsHtml += `
+          <tr class="hover:bg-slate-50/70 transition">
+            <td class="p-3.5 border-b border-slate-100 align-middle">
+              <div class="font-heading font-semibold text-navy text-sm">${plo.id}</div>
+              <p class="text-xs text-slate-500 mt-0.5 leading-snug">${escapeHtml(plo.desc)}</p>
+            </td>
+            ${cellsHtml}
+            <td class="p-2 border-b border-slate-100 text-center bg-slate-50/60">
+              ${totalBadge}
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('matrixContainer').innerHTML = `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <h2 class="font-heading font-semibold text-navy text-base sm:text-lg">
+                ตารางเมทริกซ์ผลสัมฤทธิ์ PLO × ชั้นปี (Heatmap)
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500">
+                คลิกที่ช่องใดก็ได้เพื่อเปิดหน้าต่างดูรายละเอียดรายวิชาและ CLO ของ PLO และชั้นปีนั้น (เครื่องหมาย ★ คือช่องที่มีข้อมูลจริงของวิชา 436 403)
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs shrink-0">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> ≥ 80% ผ่านเกณฑ์
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 60–79.9% เฝ้าระวัง
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 text-red-800 border border-red-200">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> &lt; 60% ปรับปรุงด่วน
+              </span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[720px] border-collapse text-left">
+              <thead>
+                <tr class="bg-navy text-white text-xs sm:text-sm font-heading">
+                  <th class="p-3.5 font-medium w-[36%]">ผลลัพธ์การเรียนรู้ระดับหลักสูตร (PLO)</th>
+                  <th class="p-3.5 font-medium text-center w-[12.5%]">ชั้นปีที่ 1<br><span class="text-[11px] font-normal text-blue-200">(YLO 1)</span></th>
+                  <th class="p-3.5 font-medium text-center w-[12.5%]">ชั้นปีที่ 2<br><span class="text-[11px] font-normal text-blue-200">(YLO 2)</span></th>
+                  <th class="p-3.5 font-medium text-center w-[12.5%]">ชั้นปีที่ 3<br><span class="text-[11px] font-normal text-blue-200">(YLO 3)</span></th>
+                  <th class="p-3.5 font-medium text-center w-[12.5%]">ชั้นปีที่ 4<br><span class="text-[11px] font-normal text-blue-200">(YLO 4)</span></th>
+                  <th class="p-3.5 font-medium text-center w-[14%] bg-navy-dark">รวมทั้งหมด</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * ============================================================================
+     * 7. แท็บ 3: รายงานระดับรายวิชา & CLO (Course & CLO Report)
+     * ============================================================================
+     */
+    function renderCoursesTab(filteredCourses) {
+      const container = document.getElementById('coursesContainer');
+      if (filteredCourses.length === 0) {
+        container.innerHTML = renderEmptyState();
+        return;
+      }
+
+      const cardsHtml = filteredCourses.map(c => {
+        const passCnt = c.matchedCLOs.filter(clo => isPass(clo.score)).length;
+        const totCnt = c.matchedCLOs.length;
+        const allPass = passCnt === totCnt;
+
+        return `
+          <article class="bg-white rounded-2xl shadow-sm border ${c.isReal ? 'border-amber-400 ring-1 ring-amber-200' : 'border-slate-200/80'} overflow-hidden print-break-inside-avoid">
+            <!-- ส่วนหัวการ์ดรายวิชา -->
+            <div class="px-5 py-4 border-b ${c.isReal ? 'bg-amber-50/60 border-amber-200/80' : 'bg-slate-50/70 border-slate-100'} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-navy text-white font-heading font-semibold text-xs">
+                    ${highlightText(c.code, state.searchQuery)}
+                  </span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.type === 'mandatory' ? 'bg-navy/10 text-navy border border-navy/15' : 'bg-slate-200/70 text-slate-600'}">
+                    ${c.type === 'mandatory' ? 'วิชาบังคับ' : 'วิชาเลือก'}
+                  </span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slatebrand-light text-slatebrand">
+                    ชั้นปีที่ ${c.year}
+                  </span>
+                  ${c.isReal
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-400 text-navy-dark shadow-xs">★ ข้อมูลจริง</span>'
+                    : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">ข้อมูลตัวอย่าง</span>'
+                  }
+                </div>
+                <h3 class="font-heading font-semibold text-slate-900 text-base sm:text-lg mt-1.5">
+                  ${highlightText(c.name, state.searchQuery)}
+                </h3>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-heading font-semibold ${allPass ? 'bg-pass-bg text-emerald-700 border border-emerald-200' : 'bg-fail-bg text-red-700 border border-red-200'}">
+                  ผ่านเกณฑ์ ${passCnt} / ${totCnt} CLO
+                </span>
+              </div>
+            </div>
+
+            <!-- รายการ CLO ภายในรายวิชา -->
+            <div class="divide-y divide-slate-100">
+              ${c.matchedCLOs.map(clo => {
+                const passed = isPass(clo.score);
+                const key = `${c.code}::${clo.id}`;
+                const isModified = modifiedKeys.has(key);
+
+                return `
+                  <div class="p-4 sm:px-5 hover:bg-slate-50/50 transition">
+                    <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                      <!-- คำอธิบาย CLO + แท็ก PLO -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                          <span class="font-heading font-semibold text-xs px-2 py-0.5 rounded-md bg-slate-100 text-navy border border-slate-200">
+                            ${clo.id}
+                          </span>
+                          ${clo.plos.map(p => `
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-heading font-medium bg-slatebrand-light text-slatebrand border border-slatebrand/15">
+                              ${p}
+                            </span>
+                          `).join('')}
+                          ${isModified ? '<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">ปรับจำลอง</span>' : ''}
+                        </div>
+                        <p class="text-sm text-slate-700 leading-relaxed">
+                          ${highlightText(clo.text, state.searchQuery)}
+                        </p>
+                      </div>
+
+                      <!-- แถบ Progress Bar + ตัวเลข % + สถานะ -->
+                      <div class="lg:w-80 shrink-0 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="text-xs text-slate-500">Rubric ระดับ 2–3</span>
+                          <div class="flex items-center gap-2">
+                            <span class="font-heading font-bold text-base ${passed ? 'text-emerald-600' : 'text-red-600'}">
+                              ${fmtPct(clo.score)}
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${passed ? 'bg-pass-bg text-emerald-700' : 'bg-fail-bg text-red-700'}">
+                              ${passed ? 'ผ่านเกณฑ์' : 'ต่ำกว่าเกณฑ์'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <!-- Progress bar พร้อมเส้นขีดเกณฑ์ 80% -->
+                        <div class="relative w-full h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200/70">
+                          <div class="h-full rounded-full transition-all duration-300 ${passed ? 'bg-emerald-500' : 'bg-red-500'}" style="width: ${Math.min(100, Math.max(0, clo.score))}%"></div>
+                          <div class="absolute top-0 bottom-0 w-0.5 bg-amber-600 z-10" style="left: 80%" title="เกณฑ์มาตรฐาน 80%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                          <span>0%</span>
+                          <span class="text-amber-700 font-medium pl-16">เกณฑ์ 80%</span>
+                          <span>100%</span>
+                        </div>
+
+                        ${state.simMode ? `
+                          <div class="pt-2 flex items-center gap-2 no-print">
+                            <input
+                              type="range" min="0" max="100" step="0.01" value="${clo.score}"
+                              oninput="handleScoreChange('${c.code}', '${clo.id}', this.value)"
+                              class="sim-slider flex-1"
+                              aria-label="ปรับคะแนนจำลอง ${c.code} ${clo.id}"
+                            />
+                            <input
+                              type="number" min="0" max="100" step="0.01" value="${Number(clo.score).toFixed(2)}"
+                              onchange="handleScoreChange('${c.code}', '${clo.id}', this.value)"
+                              class="w-20 px-2 py-1 text-xs font-heading font-semibold text-right border border-amber-300 bg-amber-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+                            />
+                          </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      container.innerHTML = `<div class="space-y-4">${cardsHtml}</div>`;
+    }
+
+    /**
+     * ============================================================================
+     * 8. แท็บ 4: รายการเฝ้าระวังและปรับปรุง (CQI Action List)
+     * ============================================================================
+     */
+    function renderCQITab(filteredCourses) {
+      // รวบรวมเฉพาะ CLO ที่คะแนน < 80%
+      const failedItems = [];
+      filteredCourses.forEach(c => {
+        c.matchedCLOs.forEach(clo => {
+          if (!isPass(clo.score)) {
+            failedItems.push({
+              courseCode: c.code,
+              courseName: c.name,
+              year: c.year,
+              type: c.type,
+              isReal: c.isReal,
+              clo
+            });
+          }
+        });
+      });
+
+      // อัปเดตตัวเลข Badge บนแท็บ CQI
+      document.getElementById('cqiTabBadge').textContent = failedItems.length;
+
+      const container = document.getElementById('cqiContainer');
+      if (failedItems.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 p-10 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-pass-bg text-emerald-600 flex items-center justify-center mx-auto mb-3">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="font-heading font-semibold text-emerald-800 text-lg">ยอดเยี่ยม! ไม่พบ CLO ที่ต่ำกว่าเกณฑ์ 80%</h3>
+            <p class="text-sm text-slate-500 mt-1">ทุกรายการในขอบเขตการคัดกรองปัจจุบันผ่านเกณฑ์ผลสัมฤทธิ์ระดับ Rubric 2–3 เรียบร้อยแล้ว</p>
+          </div>
+        `;
+        return;
+      }
+
+      // เรียงลำดับ: ให้ข้อมูลจริง (436 403) ขึ้นโดดเด่นด้านบน จากนั้นเรียงจากคะแนนน้อยไปมาก
+      failedItems.sort((a, b) => {
+        if (a.isReal !== b.isReal) return a.isReal ? -1 : 1;
+        return a.clo.score - b.clo.score;
+      });
+
+      const rowsHtml = failedItems.map((item, index) => {
+        const gap = (PASS_THRESHOLD - item.clo.score).toFixed(2);
+        return `
+          <tr class="${item.isReal ? 'bg-amber-50/70' : 'hover:bg-slate-50'} transition">
+            <td class="p-3.5 border-b border-slate-100 text-center font-heading font-semibold text-slate-500 text-sm">
+              ${index + 1}
+            </td>
+            <td class="p-3.5 border-b border-slate-100">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="font-heading font-semibold text-navy text-sm">${item.courseCode}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full ${item.type === 'mandatory' ? 'bg-navy/10 text-navy' : 'bg-slate-100 text-slate-600'}">
+                  ${item.type === 'mandatory' ? 'บังคับ' : 'เลือก'}
+                </span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-slatebrand-light text-slatebrand">ปี ${item.year}</span>
+                ${item.isReal ? '<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400 text-navy-dark">★ ข้อมูลจริง</span>' : ''}
+              </div>
+              <div class="text-sm text-slate-800 font-medium mt-0.5">${escapeHtml(item.courseName)}</div>
+            </td>
+            <td class="p-3.5 border-b border-slate-100">
+              <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                <span class="font-heading font-semibold text-xs px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">${item.clo.id}</span>
+                ${item.clo.plos.map(p => `<span class="text-xs font-heading font-medium px-2 py-0.5 rounded bg-slatebrand-light text-slatebrand">${p}</span>`).join('')}
+              </div>
+              <p class="text-sm text-slate-700 leading-snug">${escapeHtml(item.clo.text)}</p>
+            </td>
+            <td class="p-3.5 border-b border-slate-100 text-right whitespace-nowrap">
+              <div class="font-heading font-bold text-base text-red-600">${fmtPct(item.clo.score)}</div>
+              <div class="text-xs text-red-500 font-medium">ขาดอีก ${gap}%</div>
+              ${state.simMode ? `
+                <div class="mt-2 flex items-center justify-end gap-1.5 no-print">
+                  <input
+                    type="number" min="0" max="100" step="0.01" value="${Number(item.clo.score).toFixed(2)}"
+                    onchange="handleScoreChange('${item.courseCode}', '${item.clo.id}', this.value)"
+                    class="w-20 px-2 py-1 text-xs font-heading font-semibold text-right border border-amber-300 bg-amber-50 rounded-lg"
+                  />
+                </div>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-sm border border-red-200/80 overflow-hidden">
+          <div class="px-5 py-4 bg-fail-bg/70 border-b border-red-200/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 class="font-heading font-semibold text-red-900 text-base sm:text-lg">
+                รายการเฝ้าระวังและวางแผนปรับปรุงการเรียนการสอน (CQI Action List)
+              </h2>
+              <p class="text-xs sm:text-sm text-red-800/80">
+                รวบรวมเฉพาะ CLO ที่มีผู้เรียนระดับ Rubric 2–3 ต่ำกว่าเกณฑ์ 80% (แสดงข้อมูลจริงของวิชา 436 403 ด้านบนสุด แล้วเรียงจากคะแนนน้อยไปมาก)
+              </p>
+            </div>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-xl bg-red-600 text-white font-heading font-semibold text-xs sm:text-sm shrink-0 self-start sm:self-center">
+              พบ ${failedItems.length} รายการต้องปรับปรุง
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[740px] border-collapse text-left">
+              <thead>
+                <tr class="bg-slate-50 text-slate-600 text-xs font-heading uppercase border-b border-slate-200">
+                  <th class="p-3.5 text-center w-12">#</th>
+                  <th class="p-3.5 w-[28%]">รายวิชา / ชั้นปี</th>
+                  <th class="p-3.5">CLO ที่ต่ำกว่าเกณฑ์ &amp; ผลกระทบต่อ PLO</th>
+                  <th class="p-3.5 text-right w-36">ผลสัมฤทธิ์</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEmptyState() {
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-10 text-center">
+          <h3 class="font-heading font-semibold text-slate-800 text-base">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการคัดกรอง</h3>
+          <p class="text-sm text-slate-500 mt-1">ลองปรับเปลี่ยนประเภทวิชา ชั้นปี PLO หรือล้างคำค้นหา</p>
+          <button type="button" onclick="resetFilters()" class="mt-4 px-4 py-2 rounded-xl bg-navy text-white text-sm font-medium hover:bg-navy-dark transition cursor-pointer">
+            ล้างตัวกรองทั้งหมด
+          </button>
+        </div>
+      `;
+    }
+
+    /**
+     * ============================================================================
+     * 9. Modal เจาะลึกจากตารางเมทริกซ์ และฟังก์ชันโต้ตอบ (Interactions)
+     * ============================================================================
+     */
+    function openDrillModal(ploId, yearVal) {
+      const ploObj = PLOS.find(p => p.id === ploId);
+      const filteredCourses = getFilteredCourses();
+
+      const matched = [];
+      filteredCourses.forEach(c => {
+        if (yearVal !== 'all' && c.year !== yearVal) return;
+        const clos = c.matchedCLOs.filter(clo => clo.plos.includes(ploId));
+        if (clos.length > 0) {
+          matched.push({ ...c, clos });
+        }
+      });
+
+      let passCnt = 0;
+      let totCnt = 0;
+      matched.forEach(c => c.clos.forEach(clo => {
+        totCnt++;
+        if (isPass(clo.score)) passCnt++;
+      }));
+      const pct = totCnt > 0 ? (passCnt / totCnt) * 100 : 0;
+
+      document.getElementById('drillModalTag').textContent = yearVal === 'all' ? `${ploId} • ทุกชั้นปีตามเงื่อนไข` : `${ploId} • ชั้นปีที่ ${yearVal} (YLO ${yearVal})`;
+      document.getElementById('drillModalTitle').textContent = ploObj.desc;
+      document.getElementById('drillModalSub').textContent = `พบ ${matched.length} รายวิชา • ผ่านเกณฑ์ ${passCnt}/${totCnt} CLO (${fmtPct(pct)})`;
+
+      document.getElementById('drillModalBody').innerHTML = matched.map(c => `
+        <div class="bg-white rounded-xl border ${c.isReal ? 'border-amber-400' : 'border-slate-200'} p-4">
+          <div class="flex flex-wrap items-center gap-2 mb-2.5">
+            <span class="font-heading font-semibold text-navy text-sm">${c.code} ${escapeHtml(c.name)}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full ${c.type === 'mandatory' ? 'bg-navy/10 text-navy' : 'bg-slate-100 text-slate-600'}">${c.type === 'mandatory' ? 'วิชาบังคับ' : 'วิชาเลือก'}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-slatebrand-light text-slatebrand">ปี ${c.year}</span>
+            ${c.isReal ? '<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400 text-navy-dark">★ ข้อมูลจริง</span>' : ''}
+          </div>
+          <div class="space-y-2">
+            ${c.clos.map(clo => {
+              const passed = isPass(clo.score);
+              return `
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                  <div class="text-sm text-slate-700">
+                    <span class="font-heading font-semibold text-xs text-navy mr-1">${clo.id}:</span>
+                    ${escapeHtml(clo.text)}
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="font-heading font-bold text-sm ${passed ? 'text-emerald-600' : 'text-red-600'}">${fmtPct(clo.score)}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${passed ? 'bg-pass-bg text-emerald-700' : 'bg-fail-bg text-red-700'}">
+                      ${passed ? 'ผ่าน' : 'ต่ำกว่าเกณฑ์'}
+                    </span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      modalJumpContext = { ploId, yearVal };
+      const modal = document.getElementById('drillModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDrillModal() {
+      const modal = document.getElementById('drillModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function jumpToCourseDetail(courseCode) {
+      state.courseType = 'all';
+      state.selectedYears = [];
+      state.selectedPLOs = [];
+      state.statusFilter = 'all';
+      state.searchQuery = courseCode;
+      state.activeTab = 'courses';
+      document.getElementById('searchInput').value = courseCode;
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleYearFromCard(yr) {
+      const idx = state.selectedYears.indexOf(yr);
+      if (idx > -1 && state.selectedYears.length === 1) {
+        state.selectedYears = [];
+      } else {
+        state.selectedYears = [yr];
+      }
+      renderAll();
+    }
+
+    function handleScoreChange(courseCode, cloId, rawVal) {
+      let val = parseFloat(rawVal);
+      if (isNaN(val)) return;
+      val = Math.max(0, Math.min(100, val));
+
+      const course = coursesData.find(c => c.code === courseCode);
+      if (!course) return;
+      const clo = course.clos.find(item => item.id === cloId);
+      if (!clo) return;
+
+      clo.score = Number(val.toFixed(2));
+
+      // ตรวจสอบว่าค่าเปลี่ยนจากต้นฉบับหรือไม่
+      const origCourse = INITIAL_COURSES.find(c => c.code === courseCode);
+      const origClo = origCourse.clos.find(item => item.id === cloId);
+      const key = `${courseCode}::${cloId}`;
+      if (Math.abs(clo.score - origClo.score) > 0.001) {
+        modifiedKeys.add(key);
+      } else {
+        modifiedKeys.delete(key);
+      }
+
+      renderAll();
+    }
+
+    function resetAllScores() {
+      coursesData = cloneCourses(INITIAL_COURSES);
+      modifiedKeys.clear();
+      renderAll();
+      showToast('รีเซ็ตคะแนนทั้งหมดกลับเป็นข้อมูลเริ่มต้นเรียบร้อยแล้ว');
+    }
+
+    function resetFilters() {
+      state.courseType = 'mandatory';
+      state.selectedYears = [];
+      state.selectedPLOs = [];
+      state.statusFilter = 'all';
+      state.searchQuery = '';
+      document.getElementById('searchInput').value = '';
+      renderAll();
+    }
+
+    /**
+     * ============================================================================
+     * 10. ฟังก์ชันหลักในการเรนเดอร์ทุกส่วนของ Dashboard
+     * ============================================================================
+     */
+    function renderAll() {
+      updateFilterControlsUI();
+      const filteredCourses = getFilteredCourses();
+
+      // คำนวณจำนวน CQI Badge เสมอไม่ว่าจะอยู่แท็บไหน
+      const cqiCourses = getFilteredCourses({ ignoreStatus: true });
+      let failCount = 0;
+      cqiCourses.forEach(c => c.matchedCLOs.forEach(clo => {
+        if (!isPass(clo.score)) failCount++;
+      }));
+      document.getElementById('cqiTabBadge').textContent = failCount;
+
+      if (state.activeTab === 'overview') {
+        renderOverviewTab(filteredCourses);
+      } else if (state.activeTab === 'matrix') {
+        renderMatrixTab(filteredCourses);
+      } else if (state.activeTab === 'courses') {
+        renderCoursesTab(filteredCourses);
+      } else if (state.activeTab === 'cqi') {
+        renderCQITab(cqiCourses);
+      }
+    }
+
+    function bindEvents() {
+      // ประเภทวิชา
+      document.getElementById('courseTypeGroup').addEventListener('click', (e) => {
+        const btn = e.target.closest('.type-btn');
+        if (!btn) return;
+        state.courseType = btn.dataset.type;
+        renderAll();
+      });
+
+      // ชั้นปี (Multi-select)
+      document.getElementById('yearFilterGroup').addEventListener('click', (e) => {
+        const btn = e.target.closest('.year-btn');
+        if (!btn) return;
+        const val = btn.dataset.year;
+        if (val === 'all') {
+          state.selectedYears = [];
+        } else {
+          const yr = Number(val);
+          const idx = state.selectedYears.indexOf(yr);
+          if (idx > -1) state.selectedYears.splice(idx, 1);
+          else state.selectedYears.push(yr);
+          if (state.selectedYears.length === 4) state.selectedYears = [];
+        }
+        renderAll();
+      });
+
+      // สถานะเกณฑ์
+      document.getElementById('statusFilterGroup').addEventListener('click', (e) => {
+        const btn = e.target.closest('.status-btn');
+        if (!btn) return;
+        state.statusFilter = btn.dataset.status;
+        renderAll();
+      });
+
+      // ค้นหา
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        renderAll();
+      });
+      document.getElementById('btnClearSearch').addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        searchInput.focus();
+        renderAll();
+      });
+
+      // ล้างตัวกรอง
+      document.getElementById('btnResetFilters').addEventListener('click', resetFilters);
+
+      // แท็บนำทาง
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeTab = btn.dataset.tab;
+          renderAll();
+        });
+      });
+
+      // โหมดทดลองปรับคะแนน (Simulation Mode)
+      document.getElementById('btnToggleSim').addEventListener('click', () => {
+        state.simMode = !state.simMode;
+        renderAll();
+        showToast(state.simMode
+          ? 'เปิดโหมดทดลองปรับคะแนนแล้ว — ปรับตัวเลข % เพื่อดูผลลัพธ์แบบเรียลไทม์'
+          : 'ปิดโหมดทดลองปรับคะแนนแล้ว');
+      });
+
+      document.getElementById('btnResetScores').addEventListener('click', resetAllScores);
+
+      // พิมพ์รายงาน / PDF
+      document.getElementById('btnPrint').addEventListener('click', () => window.print());
+
+      // Modal Events
+      document.getElementById('btnCloseModal').addEventListener('click', closeDrillModal);
+      document.getElementById('btnCloseModalFooter').addEventListener('click', closeDrillModal);
+      document.getElementById('drillModal').addEventListener('click', (e) => {
+        if (e.target.id === 'drillModal') closeDrillModal();
+      });
+      document.getElementById('btnModalJumpToCourses').addEventListener('click', () => {
+        if (!modalJumpContext) return;
+        state.selectedPLOs = [modalJumpContext.ploId];
+        state.selectedYears = modalJumpContext.yearVal === 'all' ? [] : [modalJumpContext.yearVal];
+        state.activeTab = 'courses';
+        closeDrillModal();
+        renderAll();
+      });
+    }
+
+    // เริ่มต้นการทำงานเมื่อโหลดหน้าเว็บ
+    window.addEventListener('DOMContentLoaded', () => {
+      initPLOChips();
+      bindEvents();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
